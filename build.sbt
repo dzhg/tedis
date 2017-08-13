@@ -1,5 +1,7 @@
 name := "tedis"
 
+organization := "com.github.dzhg"
+
 version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.11.11"
