@@ -1,18 +1,18 @@
 package com.github.dzhg.tedis
 
-import org.scalatest.{MustMatchers, WordSpec}
+import com.github.dzhg.tedis.utils.{ServerAndClient, TedisSuite}
 
-class PipelineSpec extends WordSpec with MustMatchers with WithTedisServer {
+class PipelineSpec extends TedisSuite with ServerAndClient {
 
   "Tedis Pipeline" must {
     "support MULTI" in {
-      val result = redisClient.pipeline { pipeline => }
+      val result = client.pipeline { pipeline => }
       result mustBe defined
       result.get mustBe empty
     }
 
     "handle multiple commands" in {
-      val result = redisClient.pipeline { pipeline =>
+      val result = client.pipeline { pipeline =>
         pipeline.set("key1", "value1")
         pipeline.set("key2", "value2")
         pipeline.get("key1")
@@ -37,10 +37,10 @@ class PipelineSpec extends WordSpec with MustMatchers with WithTedisServer {
     }
 
     "be clear after pipeline execution" in {
-      val r1 = redisClient.set("key1", "v1")
+      val r1 = client.set("key1", "v1")
       r1 must be (true)
 
-      val r2 = redisClient.pipeline { pipeline =>
+      val r2 = client.pipeline { pipeline =>
         pipeline.set("key1", "v2")
         pipeline.get("key1")
       }
@@ -48,10 +48,10 @@ class PipelineSpec extends WordSpec with MustMatchers with WithTedisServer {
       r2 mustBe defined
       r2.get must have size 2
 
-      val r3 = redisClient.set("key1", "v3")
+      val r3 = client.set("key1", "v3")
       r3 must be (true)
 
-      val r4 = redisClient.get("key1")
+      val r4 = client.get("key1")
 
       r4 mustBe defined
       r4.get must be ("v3")

@@ -13,22 +13,22 @@ object RESP {
   case class ArrayValue(values: Option[Seq[RESPValue]]) extends RESPValue
   case object EOFValue extends RESPValue
 
-  val SIMPLE_STRING: Int = '+'
-  val ERROR: Int = '-'
-  val INTEGER: Int = ':'
-  val BULK_STRING: Int = '$'
-  val ARRAY: Int = '*'
-  val EOF: Int = -1
+  val SIMPLE_STRING: Byte = '+'
+  val ERROR: Byte = '-'
+  val INTEGER: Byte = ':'
+  val BULK_STRING: Byte = '$'
+  val ARRAY: Byte = '*'
+  val EOF: Byte = -1
 
-  val CR: Int = '\r'
-  val LF: Int = '\n'
+  val CR: Byte = '\r'
+  val LF: Byte = '\n'
   val CRLF: Array[Byte] = Array(CR.toByte, LF.toByte)
 
   val ENCODING: String = "UTF-8"
 
   implicit def arrayToString(array: Array[Int]): String = String.valueOf(array.map(_.toChar))
   implicit def arrayToInt(array: Array[Int]): Int = arrayToString(array).toInt
-  implicit def pairToError(pair: (String, String)): ErrorValue = ErrorValue(pair._1, pair._2)
+  implicit def pairToError(pair: (String, String)): ErrorValue = ErrorValue(pair._1.trim, pair._2.trim)
   implicit def seqToArray(vs: Seq[RESPValue]): ArrayValue = ArrayValue(Some(vs))
 
   def reader(in: InputStream): RESPReader = new RESPReader(in)

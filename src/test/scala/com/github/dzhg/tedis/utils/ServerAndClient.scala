@@ -1,9 +1,10 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.utils
 
+import com.github.dzhg.tedis.TedisServer
 import com.redis.RedisClient
 import org.scalatest.{BeforeAndAfter, WordSpec}
 
-trait WithTedisServer extends BeforeAndAfter {
+trait ServerAndClient extends BeforeAndAfter {
   this: WordSpec =>
 
   class ServerRunner(server: TedisServer) extends Thread {
@@ -11,7 +12,7 @@ trait WithTedisServer extends BeforeAndAfter {
   }
 
   var server: TedisServer = _
-  var redisClient: RedisClient = _
+  var client: RedisClient = _
 
   def launchServer(): TedisServer = {
     val server = new TedisServer(0)
@@ -23,12 +24,12 @@ trait WithTedisServer extends BeforeAndAfter {
 
   before {
     server = launchServer()
-    redisClient = createClient(server)
+    client = createClient(server)
   }
 
   after {
     server.stop()
-    redisClient.disconnect
+    client.disconnect
   }
 }
 

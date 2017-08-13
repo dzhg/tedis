@@ -9,7 +9,7 @@ import scala.collection.mutable
 class RESPReader(in: InputStream) {
 
   def readValue(): RESPValue = {
-    val c = in.read()
+    val c = in.read().toByte
     c match {
       case SIMPLE_STRING => readSimpleString()
       case INTEGER => readIntegerValue()

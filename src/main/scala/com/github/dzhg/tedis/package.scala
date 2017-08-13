@@ -13,5 +13,5 @@ package object tedis {
   type CommandParams = commands.CommandParams
   type CommandParser = PartialFunction[CommandParams, TedisCommand[_]]
   type DefaultStorage = storage.LockedMapStorage
-  val RESP = protocol.RESP
+  private [tedis] val RESP = protocol.RESP
 }

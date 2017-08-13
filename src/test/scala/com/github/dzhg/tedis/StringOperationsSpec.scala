@@ -3,12 +3,12 @@ package com.github.dzhg.tedis
 import java.util
 
 import com.github.dzhg.tedis.storage.{BadTedisValue, TedisEntry, TedisKeyInfo}
-import org.scalatest.{MustMatchers, WordSpec}
+import com.github.dzhg.tedis.utils.TedisSuite
 
 /**
   * @author dzhg 8/11/17
   */
-class StringOperationsSpec extends WordSpec with MustMatchers {
+class StringOperationsSpec extends TedisSuite {
 
   class TedisStringTest(internal: TedisStorage) extends TedisTest(internal) with StringOperations with KeyOperations
 

@@ -1,11 +1,11 @@
 package com.github.dzhg.tedis
 
-import org.scalatest.{MustMatchers, WordSpec}
+import com.github.dzhg.tedis.utils.TedisSuite
 
 /**
   * @author dzhg 8/11/17
   */
-class TedisSpec extends WordSpec with MustMatchers {
+class TedisSpec extends TedisSuite {
 
   "Tedis" must {
     "support string operations" in {
@@ -14,16 +14,14 @@ class TedisSpec extends WordSpec with MustMatchers {
       b must be (true)
 
       val v = tedis.get("key")
-      v mustBe defined
-      v.get must be ("value")
+      v.value must be ("value")
     }
 
     "support hash operations" in {
       val tedis = Tedis()
       tedis.hset("k1", "f1", "v1")
       val v = tedis.hget("k1", "f1")
-      v mustBe defined
-      v.get must be ("v1")
+      v.value must be ("v1")
     }
   }
 }
