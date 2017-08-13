@@ -1,5 +1,6 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.operations
 
+import com.github.dzhg.tedis.CommandExecutor
 import com.github.dzhg.tedis.commands.KeyCommands.TtlCmd
 
 /**

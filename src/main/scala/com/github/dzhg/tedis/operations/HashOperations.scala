@@ -1,6 +1,7 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.operations
 
 import com.github.dzhg.tedis.commands.HashCommands.{HgetCmd, HsetCmd}
+import com.github.dzhg.tedis.{CommandExecutor, Helpers, TedisException}
 
 /**
   * @author dzhg 8/11/17

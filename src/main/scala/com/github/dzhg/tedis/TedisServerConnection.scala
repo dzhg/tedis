@@ -35,10 +35,8 @@ class TedisServerConnection(s: Socket, server: TedisServer) extends Thread with 
               LOGGER.debug(s"CMD: $cmd")
               if (pipeline) {
                 handlePipeline(cmd, out)
-              } else if (cmd == MultiCmd) {
-                pipeline = true
-                out.writeValue(SimpleStringValue("OK"))
               } else {
+                if (cmd == MultiCmd) pipeline = true
                 val result = server.tedis.executeToRESP(cmd)
                 LOGGER.debug(s"RESULT: $result")
                 out.writeValue(result)
@@ -59,6 +57,7 @@ class TedisServerConnection(s: Socket, server: TedisServer) extends Thread with 
     }
   }
 
+  // TODO: Extract pipeline support to separate trait
   private def handlePipeline(cmd: TedisCommand[_], out: RESPWriter): Unit = {
     cmd match {
       case MultiCmd => throw multiNested()

@@ -13,9 +13,8 @@ class TedisServerSpec extends TedisSuite with ServerAndClient {
     "support simple string commands (set, get)" in {
       val setResult = client.set("key1", "value1")
       setResult must be (true)
-      val value = client.get("key1")
-      value mustBe defined
-      value.get must be ("value1")
+      val v = client.get("key1")
+      v.value must be ("value1")
     }
   }
 }

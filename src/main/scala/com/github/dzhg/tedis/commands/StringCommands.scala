@@ -73,6 +73,42 @@ object StringCommands extends Helpers with TedisErrors {
 
   def parseSetCmd(params: List[RESPValue]): TedisCommand[_] = params match {
     case BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil => SimpleSetCmd(key, value, None)
+    case BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: others =>
+      // has EX PX NX or XX
+      // there are only 3 cases:
+      // 1: only NX or XX
+      // 2: EX <SECONDS> | PX <MILLIS>
+      // 3: case 1 with NX or XX
+      others.size match {
+        case 1 => others.head match {
+          case BulkStringValue(Some(flag)) =>
+            SetCmd(key, value, onlyIfExists = "XX" == flag.toUpperCase(), None)
+          case _ => syntaxError()
+        }
+        case 2 => (others.head, others(1)) match {
+          case (BulkStringValue(Some(exFlag)), BulkStringValue(Some(exValue))) => exFlag.toUpperCase() match {
+            case "EX" => SimpleSetCmd(key, value, Some(exValue.toLong * 1000))
+            case "PX" => SimpleSetCmd(key, value, Some(exValue.toLong))
+            case _ => syntaxError()
+          }
+          case _ => syntaxError()
+        }
+        case 3 => (others.head, others(1), others(2)) match {
+          case (BulkStringValue(Some(v1)), BulkStringValue(Some(v2)), BulkStringValue(Some(v3))) =>
+            val (a, b, c) = (v1.toUpperCase(), v2.toUpperCase(), v3.toUpperCase())
+            if ((a == "NX" || a == "XX") && (b == "EX" || b == "PX")) {
+              val ex = if (b == "PX") c.toLong else c.toLong * 1000
+              SetCmd(key, value, a == "XX", Some(ex))
+            } else if ((a == "EX" || a == "PX") && (c == "NX" || c == "XX")) {
+              val ex = if (a == "PX") b.toLong else b.toLong * 1000
+              SetCmd(key, value, c == "XX", Some(ex))
+            } else {
+              syntaxError()
+            }
+          case _ => syntaxError()
+        }
+        case _ => syntaxError()
+      }
     case _ => syntaxError()
   }
 

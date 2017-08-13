@@ -1,9 +1,10 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.operations
 
 import java.util
 
 import com.github.dzhg.tedis.storage.{BadTedisValue, TedisEntry, TedisKeyInfo}
-import com.github.dzhg.tedis.utils.TedisSuite
+import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
+import com.github.dzhg.tedis.{TedisException, TedisStorage}
 
 /**
   * @author dzhg 8/11/17
@@ -32,8 +33,7 @@ class StringOperationsSpec extends TedisSuite {
       result must be(true)
 
       val value = ops.get("key1")
-      value mustBe defined
-      value.get must be("value2")
+      value.value must be("value2")
     }
 
     "not overwrite value if keys are different" in {
@@ -42,12 +42,10 @@ class StringOperationsSpec extends TedisSuite {
       ops.set("key2", "value2")
 
       val v1 = ops.get("key1")
-      v1 mustBe defined
-      v1.get must be("value1")
+      v1.value must be("value1")
 
       val v2 = ops.get("key2")
-      v2 mustBe defined
-      v2.get must be("value2")
+      v2.value must be("value2")
     }
   }
 
@@ -73,8 +71,7 @@ class StringOperationsSpec extends TedisSuite {
       ops.set("key1", "value1", Some(100L))
 
       val ttl = ops.ttl("key1")
-      ttl mustBe defined
-      ttl.get must be (100L)
+      ttl.value must be (100L)
     }
 
     "not set ttl if time is not assigned" in {
@@ -94,8 +91,7 @@ class StringOperationsSpec extends TedisSuite {
       result must be (true)
 
       val v = ops.get("key1")
-      v mustBe defined
-      v.get must be ("value2")
+      v.value must be ("value2")
     }
 
     "not set value if key exists and onlyIfExists is false" in {
@@ -105,8 +101,7 @@ class StringOperationsSpec extends TedisSuite {
       result must be (false)
 
       val v = ops.get("key1")
-      v mustBe defined
-      v.get must be ("value1")
+      v.value must be ("value1")
     }
 
     "set value if key does not exist and onlyIfExists is false" in {
@@ -164,14 +159,11 @@ class StringOperationsSpec extends TedisSuite {
       val vs = ops.mget("key1", "key2", "key3")
       vs must have size 3
 
-      vs.head mustBe defined
-      vs.head.get must be ("value1")
+      vs.head.value must be ("value1")
 
-      vs(1) mustBe defined
-      vs(1).get must be ("value2")
+      vs(1).value must be ("value2")
 
-      vs(2) mustBe defined
-      vs(2).get must be ("value3")
+      vs(2).value must be ("value3")
     }
 
     "return None for non-existing keys" in {
@@ -181,8 +173,7 @@ class StringOperationsSpec extends TedisSuite {
       val vs = ops.mget("key", "key1", "key2")
       vs must have size 3
 
-      vs.head mustBe defined
-      vs.head.get must be ("value")
+      vs.head.value must be ("value")
 
       vs(1) mustBe empty
       vs(2) mustBe empty
@@ -197,8 +188,7 @@ class StringOperationsSpec extends TedisSuite {
       val vs = ops.mget("key", "key1")
       vs must have size 2
 
-      vs.head mustBe defined
-      vs.head.get must be ("value")
+      vs.head.value must be ("value")
 
       vs(1) mustBe empty
     }
@@ -206,7 +196,6 @@ class StringOperationsSpec extends TedisSuite {
 
   private def verifyStringValue(ops: StringOperations, key: String, expect: String) = {
     val v = ops.get(key)
-    v mustBe defined
-    v.get must be (expect)
+    v.value must be (expect)
   }
 }

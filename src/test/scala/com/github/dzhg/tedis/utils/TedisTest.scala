@@ -1,6 +1,7 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.utils
 
 import com.github.dzhg.tedis.storage.LockedStorage
+import com.github.dzhg.tedis.{CommandExecutor, TedisStorage}
 
 /**
   * @author dzhg 8/11/17

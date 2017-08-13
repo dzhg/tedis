@@ -1,9 +1,10 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.operations
 
 import java.util
 
 import com.github.dzhg.tedis.storage.TedisEntry
-import com.github.dzhg.tedis.utils.TedisSuite
+import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
+import com.github.dzhg.tedis.TedisException
 
 /**
   * @author dzhg 8/11/17
@@ -21,8 +22,7 @@ class HashOperationsSpec extends TedisSuite {
       result must be (1L)
 
       val v = ops.hget("h1", "f1")
-      v mustBe defined
-      v.get must be ("v1")
+      v.value must be ("v1")
     }
 
     "replace hash value" in {
@@ -30,9 +30,10 @@ class HashOperationsSpec extends TedisSuite {
       ops.hset("h1", "f1", "v1")
 
       val result = ops.hset("h1", "f1", "v2")
+      result must be (0L)
+
       val v= ops.hget("h1", "f1")
-      v mustBe defined
-      v.get must be ("v2")
+      v.value must be ("v2")
     }
 
     "throw exception if key is not holding hash" in {
