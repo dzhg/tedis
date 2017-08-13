@@ -7,3 +7,11 @@ jdk:
 cache:
   directories:
   - $HOME/.ivy2
+before_cache:
+  # The `ivydata-*.properties` & root level `*.{properties,xml}` files'
+  # effect on resolution time is in the noise, but they are
+  # re-timestamped in internal comments and fields on each run and this
+  # leads to travis-ci cache thrash.  Kill these files before the cache
+  # check to avoid un-needed cache re-packing and re-upload (a ~100s
+  # operation).
+  - find ${HOME}/.ivy2 -type f -name "ivydata-*.properties" -delete
