@@ -15,4 +15,4 @@ before_cache:
 script:
    - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 after_success:
-  - sbt coveralls
+  - sbt coverageReport coveralls
