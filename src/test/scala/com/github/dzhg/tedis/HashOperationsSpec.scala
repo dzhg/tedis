@@ -2,6 +2,7 @@ package com.github.dzhg.tedis
 
 import java.util
 
+import com.github.dzhg.tedis.storage.TedisEntry
 import org.scalatest.{MustMatchers, WordSpec}
 
 /**
@@ -9,7 +10,7 @@ import org.scalatest.{MustMatchers, WordSpec}
   */
 class HashOperationsSpec extends WordSpec with MustMatchers {
   class TedisHashTest(internal: util.Map[String, TedisEntry]) extends TedisTest(internal)
-    with HashOperations with StringOperations with Operations
+    with HashOperations with StringOperations with KeyOperations
 
   def instance(): TedisHashTest = new TedisHashTest(new util.HashMap[String, TedisEntry]())
 

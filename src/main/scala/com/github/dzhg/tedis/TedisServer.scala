@@ -2,7 +2,7 @@ package com.github.dzhg.tedis
 
 import java.net._
 
-import com.github.dzhg.tedis.protocol.Request
+import org.slf4j.LoggerFactory
 
 import scala.util.control.NonFatal
 
@@ -10,55 +10,38 @@ import scala.util.control.NonFatal
   * @author dzhg 8/11/17
   */
 class TedisServer(port: Int) {
+  private val LOGGER = LoggerFactory.getLogger(classOf[TedisServer])
+
+  var serverStop = false
+
+  val socket = new ServerSocket(port)
+  val tedis = Tedis()
+
+  def stop(): Unit = {
+    serverStop = true
+    socket.close()
+  }
 
   def start(): Unit = {
-    val server = new ServerSocket(port)
-    while (true) {
-      val s = server.accept()
-      new TedisServerThread(s).start()
-    }
-  }
-
-  class TedisServerThread(s: Socket) extends Thread {
-    override def run(): Unit = {
-      val in = s.getInputStream
-      val out = s.getOutputStream
-
-      while (true) {
-
-        val req = Request(in)
-        val count = req.consumeCount()
-        println(s"COUNT: $count")
-        0.until(count.toInt).foreach { _ =>
-          val length = req.consumeLength()
-          val part = req.consumeBy(length)
-          println(s"LENGTH: $length, PART: $part")
-          req.consumeUntil('\n')
-        }
-
-        //req.consumeEOF()
-
-        println("----- response ----->")
-
-        out.write("-ERR unknown command\r\n".getBytes())
-        out.flush()
+    LOGGER.info(s"Starting Tedis Server at: ${socket.getLocalPort}")
+    while (!serverStop) {
+      try {
+        val s = socket.accept()
+        new TedisServerConnection(s, this).start()
+      } catch {
+        case NonFatal(e) => LOGGER.info(e.getMessage)
       }
-      s.close()
     }
   }
-
 }
 
 object TedisServer extends App {
+  val port = if (args.length == 0) 0 else args(0).toInt
   try {
-    val port = if (args.length == 0) 9999 else args(0).toInt
-    println(s"Starting server at port: $port")
     new TedisServer(port).start()
   } catch {
     case NonFatal(e) =>
-      println(s"Error: ${e.getMessage}")
+      println(s"Server crashed due to: ${e.getMessage}")
       e.printStackTrace()
   }
 }
-
-

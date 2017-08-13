@@ -2,6 +2,7 @@ package com.github.dzhg.tedis
 
 import java.util
 
+import com.github.dzhg.tedis.storage.{BadTedisValue, TedisEntry, TedisKeyInfo}
 import org.scalatest.{MustMatchers, WordSpec}
 
 /**
@@ -9,7 +10,7 @@ import org.scalatest.{MustMatchers, WordSpec}
   */
 class StringOperationsSpec extends WordSpec with MustMatchers {
 
-  class TedisStringTest(internal: TedisStorage) extends TedisTest(internal) with StringOperations with Operations
+  class TedisStringTest(internal: TedisStorage) extends TedisTest(internal) with StringOperations with KeyOperations
 
   def instance(): TedisStringTest = new TedisStringTest(new util.HashMap[String, TedisEntry]())
 
@@ -60,7 +61,7 @@ class StringOperationsSpec extends WordSpec with MustMatchers {
     "throw exception if the value is not a string" in {
       val ops = instance()
       ops.internal.put("key1",
-        TedisEntry(TedisKeyInfo("key1", None, System.currentTimeMillis()), ErrorValue))
+        TedisEntry(TedisKeyInfo("key1", None, System.currentTimeMillis()), BadTedisValue))
 
       a [TedisException] mustBe thrownBy (ops.get("key1"))
     }
@@ -191,7 +192,7 @@ class StringOperationsSpec extends WordSpec with MustMatchers {
       val ops = instance()
       ops.set("key", "value")
       ops.internal.put("key1",
-        TedisEntry(TedisKeyInfo("key1", None, System.currentTimeMillis()), ErrorValue))
+        TedisEntry(TedisKeyInfo("key1", None, System.currentTimeMillis()), BadTedisValue))
 
       val vs = ops.mget("key", "key1")
       vs must have size 2
