@@ -14,7 +14,7 @@
 
 Tedis is basically a mock of Redis. It's implemented in Scala. It can be run locally in same JVM with unit test code.
 
-It's usefuly to test your Redis related code without a real Redis server.
+It's useful for testing Redis related code without a real Redis server.
 
 ```Scala
 class ServerRunner(server: TedisServer) extends Thread {
