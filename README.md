@@ -33,8 +33,8 @@ val v = client.get("key")
 ```
 
 ## Roadmap
-| Version |                  Features                  |  Schedule |    Status   |
-|---------|--------------------------------------------|-----------|-------------|
-|  0.1.0  | Support String, Hash, Set, List operations | Oct. 2017 | In Progress |
-|  0.2.0  | Support bit operations                     |           |             |
-|  0.5.0  |                                            |           |             |
+| Version | Features                                                                 | Schedule  | Status      |
+|---------|--------------------------------------------------------------------------|-----------|-------------|
+| 0.1.0   | Support String, Hash, Set, List operations                               | Oct. 2017 | In Progress |
+| 0.2.0   | Support bit operations <br/>Start adapter implementation (`scala-redis`) |           |             |
+| 0.5.0   | Support `scala-redis` and `jedis` adapters                               |           |             |
