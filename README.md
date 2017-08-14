@@ -35,7 +35,7 @@ val v = client.get("key")
 
 ## Command supported
 
-[![Command Support Progress](https://img.shields.io/badge/progress-8%2F200-orange.svg)]
+![Command Support Progress](https://img.shields.io/badge/progress-8%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
