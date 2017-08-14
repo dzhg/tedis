@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.commands.StringCommands.{SetCmd, SimpleSetCmd}
+import com.github.dzhg.tedis.commands.StringCommands.{MsetCmd, SetCmd, SimpleSetCmd}
 import com.github.dzhg.tedis.utils.TedisSuite
 import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 
@@ -69,6 +69,30 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       ))
 
       val e = the [TedisException] thrownBy parser.apply(params)
+      e.error must be (SYNTAX_ERROR.error)
+      e.msg must be (SYNTAX_ERROR.msg)
+    }
+
+    "parse 'mset k1 v1 k2 v2 k3 v3'" in {
+      val params = CommandParams("MSET", List(
+        "k1", "v1", "k2", "v2", "k3", "v3"
+      ))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [MsetCmd]
+      val msetCmd = cmd.asInstanceOf[MsetCmd]
+      val kvs = msetCmd.kvs
+      kvs must have size 3
+      kvs must be (Seq(("k1", "v1"), ("k2", "v2"), ("k3", "v3")))
+    }
+
+    "throw syntax error for 'mset k1 v1 vvv'" in {
+      val params = CommandParams("MSET", List(
+        "k1", "v1", "vvv"
+      ))
+
+      val e = the [TedisException] thrownBy parser(params)
       e.error must be (SYNTAX_ERROR.error)
       e.msg must be (SYNTAX_ERROR.msg)
     }

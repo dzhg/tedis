@@ -1,4 +1,4 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.server
 
 import com.github.dzhg.tedis.utils.{ServerAndClient, TedisSuite}
 

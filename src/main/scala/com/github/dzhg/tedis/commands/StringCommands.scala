@@ -2,7 +2,7 @@ package com.github.dzhg.tedis.commands
 
 import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.protocol.RESP
-import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, RESPValue, SimpleStringValue}
+import com.github.dzhg.tedis.protocol.RESP.{ArrayValue, BulkStringValue, RESPValue, SimpleStringValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisString}
 
 import scala.collection.JavaConversions._
@@ -19,7 +19,7 @@ object StringCommands extends Helpers with TedisErrors {
       true
     }
 
-    override def resultToRESP(v: Boolean): RESP.RESPValue = SimpleStringValue("OK")
+    override def resultToRESP(v: Boolean): RESP.RESPValue = OK
   }
 
   case class SetCmd(key: String, value: String, onlyIfExists: Boolean, time: Option[Long]) extends TedisCommand[Boolean] {
@@ -53,12 +53,16 @@ object StringCommands extends Helpers with TedisErrors {
       storage.putAll(m)
       true
     }
+
+    override def resultToRESP(v: Boolean): RESPValue = OK
   }
 
   case class MgetCmd(keys: String*) extends TedisCommand[Seq[Option[String]]] {
     override def exec(storage: TedisStorage): Seq[Option[String]] = {
       keys.map { k => Option(storage.get(k)) flatMap extractStringValue }
     }
+
+    override def resultToRESP(vs: Seq[Option[String]]): RESPValue = ArrayValue(Some(vs.map(BulkStringValue)))
   }
 
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {
@@ -69,6 +73,22 @@ object StringCommands extends Helpers with TedisErrors {
   val Parser: CommandParser = {
     case CommandParams("SET", params) => parseSetCmd(params)
     case CommandParams("GET", params) => parseGetCmd(params)
+    case CommandParams("MSET", params) =>
+      if (params.size % 2 != 0) {
+        syntaxError()
+      } else {
+        val kvs = params.grouped(2).foldLeft(Seq.empty[(String, String)]) { (kvs, pair) =>
+          pair match {
+            case BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil => kvs :+ (key, value)
+            case _ => syntaxError()
+          }
+        }
+        MsetCmd(kvs: _*)
+      }
+    case CommandParams("MGET", params) => MgetCmd(params.map {
+      case BulkStringValue(Some(k)) => k
+      case _ => syntaxError()
+    }: _*)
   }
 
   def parseSetCmd(params: List[RESPValue]): TedisCommand[_] = params match {

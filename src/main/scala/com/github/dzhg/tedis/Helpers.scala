@@ -1,5 +1,6 @@
 package com.github.dzhg.tedis
 
+import com.github.dzhg.tedis.protocol.RESP.SimpleStringValue
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisValue}
 
 /**
@@ -12,4 +13,6 @@ trait Helpers {
   def keyInfo(key: String, time: Long): TedisKeyInfo = TedisKeyInfo(key, Some(time), System.currentTimeMillis())
 
   def entry(key: String, value: TedisValue): TedisEntry = TedisEntry(keyInfo(key), value)
+
+  val OK: SimpleStringValue = SimpleStringValue("OK")
 }

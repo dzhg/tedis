@@ -21,16 +21,30 @@ class ServerRunner(server: TedisServer) extends Thread {
   override def run(): Unit = server.start()
 }
 
+// Initialize TedisServer
 val server = new TedisServer(0)
 new ServerRunner(server).start()
 
 // Create a RedisClient
 val client = new RedisClient("localhost", server.socket.getLocalPort)
 
-// The client can talk to TedisServer as if it's a real Redis server
+// Client can talk to TedisServer as if it's a real Redis server
 client.set("key", "value")
 val v = client.get("key")
 ```
+
+## Command supported
+
+[![Command Support Progress](https://img.shields.io/badge/progress-8%2F200-orange.svg)]
+
+Total number of commands available in Redis: [200](https://redis.io/commands)
+
+Currently supported by Tedis: 8
+
+ * [PING](https://redis.io/commands/ping)
+ * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
+ * [SET](https://redis.io/commands/set) and [GET](https://redis.io/commands/get)
+ * [MSET](https://redis.io/commands/mset) and [MGET](https://redis.io/commands/mget)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |

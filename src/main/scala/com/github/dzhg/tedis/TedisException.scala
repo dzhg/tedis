@@ -20,10 +20,12 @@ trait TedisErrors {
   val UNKNOWN_COMMAND = TedisError("unknown command '%s'")
   val SYNTAX_ERROR = TedisError("syntax error")
   val MULTI_NESTED = TedisError("MULTI calls can not be nested")
+  val WRONG_NUMBER_OF_ARGS = TedisError("wrong number of arguments for '%s' command")
   val PROTOCOL_ERROR = TedisError("protocol error")
 
+  def wrongNumberOfArguments[T](cmd: String): T = throw TedisException(WRONG_NUMBER_OF_ARGS.error, WRONG_NUMBER_OF_ARGS.msg.format(cmd))
   def wrongType[T](): T = throw TedisException(WRONG_TYPE)
-  def unknownCommand[T](cmd: String): T = throw TedisException(UNKNOWN_COMMAND.error, String.format(UNKNOWN_COMMAND.msg, cmd))
+  def unknownCommand[T](cmd: String): T = throw TedisException(UNKNOWN_COMMAND.error, UNKNOWN_COMMAND.msg.format(cmd))
   def syntaxError[T](): T = throw TedisException(SYNTAX_ERROR)
   def multiNested[T](): T = throw TedisException(MULTI_NESTED)
   def protocolError[T](): T = throw TedisException(PROTOCOL_ERROR)
