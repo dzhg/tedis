@@ -9,5 +9,5 @@ import com.github.dzhg.tedis.commands.KeyCommands.TtlCmd
 trait KeyOperations {
   this: CommandExecutor =>
 
-  def ttl(key: String): Option[Long] = execute(TtlCmd(key))
+  def ttl(key: String): Long = execute(TtlCmd(key))
 }

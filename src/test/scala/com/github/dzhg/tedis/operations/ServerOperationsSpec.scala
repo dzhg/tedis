@@ -1,15 +1,13 @@
 package com.github.dzhg.tedis.operations
 
-import java.util
-
 import com.github.dzhg.tedis.TedisStorage
-import com.github.dzhg.tedis.storage.TedisEntry
+import com.github.dzhg.tedis.storage.HashMapTedisStorage
 import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
 
 class ServerOperationsSpec extends TedisSuite {
   class TedisServerOpsTest(internal: TedisStorage) extends TedisTest(internal) with ServerOperations
 
-  def instance(): TedisServerOpsTest= new TedisServerOpsTest(new util.HashMap[String, TedisEntry]())
+  def instance(): TedisServerOpsTest= new TedisServerOpsTest(new HashMapTedisStorage)
 
   "ping" must {
     "PONG" in {

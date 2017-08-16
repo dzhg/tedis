@@ -5,7 +5,7 @@
 
 ## Key features
 
-* Pure scala implemenation
+* Pure scala implementation
 * Run locally in memory
 * Easy to integrate with existing Java or Scala unit tests
 * Decouple unit tests from standalone Redis server
@@ -35,16 +35,17 @@ val v = client.get("key")
 
 ## Command supported
 
-![Command Support Progress](https://img.shields.io/badge/progress-8%2F200-orange.svg)
+![Command Support Progress](https://img.shields.io/badge/progress-9%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
-Currently supported by Tedis: 8
+Currently supported by Tedis: 9
 
  * [PING](https://redis.io/commands/ping)
  * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
  * [SET](https://redis.io/commands/set) and [GET](https://redis.io/commands/get)
  * [MSET](https://redis.io/commands/mset) and [MGET](https://redis.io/commands/mget)
+ * [TTL](https://redis.io/commands/ttl)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |

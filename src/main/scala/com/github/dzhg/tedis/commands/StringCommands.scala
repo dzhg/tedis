@@ -5,8 +5,6 @@ import com.github.dzhg.tedis.protocol.RESP
 import com.github.dzhg.tedis.protocol.RESP.{ArrayValue, BulkStringValue, RESPValue, SimpleStringValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisString}
 
-import scala.collection.JavaConversions._
-
 /**
   * @author dzhg 8/11/17
   */
@@ -26,7 +24,7 @@ object StringCommands extends Helpers with TedisErrors {
     override def exec(storage: TedisStorage): Boolean = {
       val entry = storage.get(key)
 
-      if ((onlyIfExists && entry != null) || (!onlyIfExists && entry == null)) {
+      if ((onlyIfExists && entry.isDefined) || (!onlyIfExists && entry.isEmpty)) {
         SimpleSetCmd(key, value, time).exec(storage)
       } else { false }
     }
@@ -36,7 +34,7 @@ object StringCommands extends Helpers with TedisErrors {
 
   case class GetCmd(key: String) extends TedisCommand[Option[String]] {
     override def exec(storage: TedisStorage): Option[String] = {
-      Option(storage.get(key)) map {
+      storage.get(key) map {
         case TedisEntry(_, s: TedisString) => s
         case _ => wrongType()
       }
@@ -59,10 +57,19 @@ object StringCommands extends Helpers with TedisErrors {
 
   case class MgetCmd(keys: String*) extends TedisCommand[Seq[Option[String]]] {
     override def exec(storage: TedisStorage): Seq[Option[String]] = {
-      keys.map { k => Option(storage.get(k)) flatMap extractStringValue }
+      keys.map { k => storage.get(k) flatMap extractStringValue }
     }
 
     override def resultToRESP(vs: Seq[Option[String]]): RESPValue = ArrayValue(Some(vs.map(BulkStringValue)))
+  }
+
+  case class SetexCmd(key: String, expiry: Integer, value: String) extends TedisCommand[Boolean] {
+    override def exec(storage: TedisStorage): Boolean = {
+      storage.put(key, TedisEntry(keyInfo(key, expiry.toLong * 1000), TedisString(value)))
+      true
+    }
+
+    override def resultToRESP(v: Boolean): RESPValue = OK
   }
 
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {

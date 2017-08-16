@@ -45,12 +45,15 @@ class GetAndSetSpec extends TedisSuite with ServerAndClient {
         v.value must be ("v1")
       }
 
-      "set value if key does not exist" in {
+      "set value and expiry if key does not exist" in {
         val result = client.set("key", "value", onlyIfExists = false, Seconds(5))
         result must be(true)
 
         val v = client.get("key")
         v.value must be("value")
+
+        val ttl = client.ttl("key")
+        ttl.value must be > 0L
       }
     }
 

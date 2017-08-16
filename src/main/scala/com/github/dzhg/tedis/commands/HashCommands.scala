@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import java.util
+import java.util.{HashMap => JMap}
 
 import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.storage.TedisHash
@@ -11,14 +11,14 @@ import com.github.dzhg.tedis.storage.TedisHash
 object HashCommands extends Helpers with TedisErrors {
   case class HsetCmd(key: String, field: String, value: String) extends TedisCommand[Long] {
     override def exec(storage: TedisStorage): Long = {
-      Option(storage.get(key)) match {
+      storage.get(key) match {
         case Some(entry) =>
           entry.value match {
             case m: TedisHash => Option(m.put(field, value)).map(_ => 0L).getOrElse(1L)
             case _ => wrongType()
           }
         case None =>
-          val m = new util.HashMap[String, String]()
+          val m = new JMap[String, String]()
           m.put(field, value)
           storage.put(key, entry(key, m))
           1L
@@ -28,7 +28,7 @@ object HashCommands extends Helpers with TedisErrors {
 
   case class HgetCmd(key: String, field: String) extends TedisCommand[Option[String]] {
     override def exec(storage: TedisStorage): Option[String] = {
-      Option(storage.get(key)) map { entry =>
+      storage.get(key) map { entry =>
         entry.value match {
           case m: TedisHash => Option(m.get(field))
           case _ => wrongType()

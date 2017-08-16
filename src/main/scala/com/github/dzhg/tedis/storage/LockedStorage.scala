@@ -1,9 +1,5 @@
 package com.github.dzhg.tedis.storage
 
-import java.util
-
-import com.github.dzhg.tedis.TedisStorage
-
 /**
   * @author dzhg 8/11/17
   */
@@ -16,7 +12,7 @@ trait LockedStorage {
 }
 
 trait LockedMapStorage extends LockedStorage {
-  private val internal: TedisStorage = new util.HashMap[String, TedisEntry]()
+  private val internal: TedisStorage = new HashMapTedisStorage
 
   override def withoutLock[T](block: (TedisStorage) => T): T = block(internal)
 

@@ -1,19 +1,17 @@
 package com.github.dzhg.tedis.operations
 
-import java.util
-
-import com.github.dzhg.tedis.storage.TedisEntry
-import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
 import com.github.dzhg.tedis.TedisException
+import com.github.dzhg.tedis.storage.HashMapTedisStorage
+import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
 
 /**
   * @author dzhg 8/11/17
   */
 class HashOperationsSpec extends TedisSuite {
-  class TedisHashTest(internal: util.Map[String, TedisEntry]) extends TedisTest(internal)
+  class TedisHashTest(internal: HashMapTedisStorage) extends TedisTest(internal)
     with HashOperations with StringOperations with KeyOperations
 
-  def instance(): TedisHashTest = new TedisHashTest(new util.HashMap[String, TedisEntry]())
+  def instance(): TedisHashTest = new TedisHashTest(new HashMapTedisStorage)
 
   "hset(key, field, value)" must {
     "set hash value" in {

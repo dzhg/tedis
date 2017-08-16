@@ -31,6 +31,6 @@ object MultiCommands extends Helpers with TedisErrors {
     case CommandParams("MULTI", Nil) => MultiCmd
     case CommandParams("EXEC", Nil) => ExecCmd
     case CommandParams("DISCARD", Nil) => DiscardCmd
-    case CommandParams(cmd, _) => wrongNumberOfArguments(cmd)
+    case CommandParams(cmd, _) if cmd == "MULTI" || cmd == "EXEC" || cmd == "DISCARD" => wrongNumberOfArguments(cmd)
   }
 }

@@ -20,7 +20,8 @@ trait CommandFactory extends Helpers with TedisErrors {
   def parsers: CommandParser =
       ServerCommands.Parser orElse
       StringCommands.Parser orElse
-      MultiCommands.Parser
+      MultiCommands.Parser orElse
+      KeyCommands.Parser
 
   def default: CommandParser = {
     case x: CommandParams => unknownCommand(x.cmd)

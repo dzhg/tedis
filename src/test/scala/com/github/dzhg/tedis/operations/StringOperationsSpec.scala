@@ -1,8 +1,6 @@
 package com.github.dzhg.tedis.operations
 
-import java.util
-
-import com.github.dzhg.tedis.storage.{BadTedisValue, TedisEntry, TedisKeyInfo}
+import com.github.dzhg.tedis.storage.{BadTedisValue, HashMapTedisStorage, TedisEntry, TedisKeyInfo}
 import com.github.dzhg.tedis.utils.{TedisSuite, TedisTest}
 import com.github.dzhg.tedis.{TedisException, TedisStorage}
 
@@ -13,7 +11,7 @@ class StringOperationsSpec extends TedisSuite {
 
   class TedisStringTest(internal: TedisStorage) extends TedisTest(internal) with StringOperations with KeyOperations
 
-  def instance(): TedisStringTest = new TedisStringTest(new util.HashMap[String, TedisEntry]())
+  def instance(): TedisStringTest = new TedisStringTest(new HashMapTedisStorage)
 
   "set(key, value) command" must {
     "set value correctly" in {
@@ -71,7 +69,7 @@ class StringOperationsSpec extends TedisSuite {
       ops.set("key1", "value1", Some(100L))
 
       val ttl = ops.ttl("key1")
-      ttl.value must be (100L)
+      ttl must be > 0L
     }
 
     "not set ttl if time is not assigned" in {
@@ -79,7 +77,7 @@ class StringOperationsSpec extends TedisSuite {
       ops.set("key1", "value1", None)
 
       val ttl = ops.ttl("key1")
-      ttl mustBe empty
+      ttl must be (-1L)
     }
   }
 
