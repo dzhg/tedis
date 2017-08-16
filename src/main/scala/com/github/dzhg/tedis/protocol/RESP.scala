@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 object RESP {
   sealed trait RESPValue
   case class SimpleStringValue(value: String) extends RESPValue
-  case class IntegerValue(value: Int) extends RESPValue
+  case class IntegerValue(value: Long) extends RESPValue
   case class ErrorValue(error: String, msg: String) extends RESPValue
   case class BulkStringValue(value: Option[String]) extends RESPValue
   case class ArrayValue(values: Option[Seq[RESPValue]]) extends RESPValue
@@ -27,7 +27,7 @@ object RESP {
   val ENCODING: String = "UTF-8"
 
   implicit def arrayToString(array: Array[Int]): String = String.valueOf(array.map(_.toChar))
-  implicit def arrayToInt(array: Array[Int]): Int = arrayToString(array).toInt
+  implicit def arrayToInt(array: Array[Int]): Long = arrayToString(array).toLong
   implicit def pairToError(pair: (String, String)): ErrorValue = ErrorValue(pair._1.trim, pair._2.trim)
   implicit def seqToArray(vs: Seq[RESPValue]): ArrayValue = ArrayValue(Some(vs))
 

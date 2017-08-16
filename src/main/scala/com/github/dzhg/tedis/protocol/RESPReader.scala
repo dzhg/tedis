@@ -40,7 +40,7 @@ class RESPReader(in: InputStream) {
   }
 
   def readBulkString(): BulkStringValue = {
-    val length: Int = readUntil(CR)
+    val length: Long = readUntil(CR)
     readUntil(LF)
     length match {
       case -1 =>
@@ -49,19 +49,19 @@ class RESPReader(in: InputStream) {
         readUntil(LF)
         BulkStringValue(Some(""))
       case n =>
-        val v = readBy(n)
+        val v = readBy(n.toInt)
         readUntil(LF)
         BulkStringValue(Some(v))
     }
   }
 
   def readArray(): ArrayValue = {
-    val count: Int = readUntil(CR)
+    val count: Long = readUntil(CR)
     readUntil(LF)
     count match {
       case -1 => ArrayValue(None)
       case 0 => ArrayValue(Some(Seq.empty))
-      case n => 0.until(n).map(_ => readValue())
+      case n => 0.until(n.toInt).map(_ => readValue())
     }
   }
 

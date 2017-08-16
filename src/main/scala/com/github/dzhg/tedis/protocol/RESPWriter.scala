@@ -28,7 +28,7 @@ class RESPWriter(out: OutputStream) extends TedisErrors {
     writeString(s"$error $msg")
   }
 
-  def writeInteger(i: Int): Unit = {
+  def writeInteger(i: Long): Unit = {
     out.write(INTEGER)
     writeString(i.toString)
   }

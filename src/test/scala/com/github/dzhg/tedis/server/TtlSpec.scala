@@ -33,5 +33,24 @@ class TtlSpec extends TedisSuite with ServerAndClient {
       val ttl = client.ttl("key")
       ttl.value must be (-2L)
     }
+
+    "support pttl command" in {
+      client.set("key", "value", onlyIfExists = false, Seconds(10))
+
+      val ttl = client.pttl("key")
+      ttl.value must be > 1000L
+    }
+
+    "return -1 for existing key without expiry (pttl)" in {
+      client.set("key", "value")
+
+      val ttl = client.pttl("key")
+      ttl.value must be (-1L)
+    }
+
+    "return -2 for non-existing key (pttl)" in {
+      val ttl = client.pttl("key")
+      ttl.value must be (-2L)
+    }
   }
 }

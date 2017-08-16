@@ -45,7 +45,7 @@ Currently supported by Tedis: 9
  * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
  * [SET](https://redis.io/commands/set) and [GET](https://redis.io/commands/get)
  * [MSET](https://redis.io/commands/mset) and [MGET](https://redis.io/commands/mget)
- * [TTL](https://redis.io/commands/ttl)
+ * [TTL](https://redis.io/commands/ttl) and [PTTL](https://redis.io/commands/pttl)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |
