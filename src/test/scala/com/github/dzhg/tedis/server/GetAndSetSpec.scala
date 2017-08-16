@@ -69,5 +69,31 @@ class GetAndSetSpec extends TedisSuite with ServerAndClient {
         v mustBe empty
       }
     }
+
+    "getset(key, value)" must {
+      "return the old value and set the new value" in {
+        client.set("key", "1")
+        val v = client.getset("key", "0")
+        v.value must be ("1")
+      }
+
+      "return nil and set the new value if the key does not exist" in {
+        val v = client.getset("key", "0")
+        v mustBe empty
+      }
+    }
+
+    "setex(key, expiry, value)" must {
+      "set the value and expiry" in {
+        val result = client.setex("key", 5000, "value")
+        result must be (true)
+
+        val v = client.get("key")
+        v.value must be ("value")
+
+        val ttl = client.ttl("key")
+        ttl.value must be > 0L
+      }
+    }
   }
 }

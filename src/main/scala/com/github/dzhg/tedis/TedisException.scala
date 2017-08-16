@@ -22,6 +22,7 @@ trait TedisErrors {
   val MULTI_NESTED = TedisError("MULTI calls can not be nested")
   val WRONG_NUMBER_OF_ARGS = TedisError("wrong number of arguments for '%s' command")
   val PROTOCOL_ERROR = TedisError("protocol error")
+  val WRONG_NUMBER_FORMAT = TedisError("value is not an integer or out of range")
 
   def wrongNumberOfArguments[T](cmd: String): T = throw TedisException(WRONG_NUMBER_OF_ARGS.error, WRONG_NUMBER_OF_ARGS.msg.format(cmd))
   def wrongType[T](): T = throw TedisException(WRONG_TYPE)
@@ -29,4 +30,5 @@ trait TedisErrors {
   def syntaxError[T](): T = throw TedisException(SYNTAX_ERROR)
   def multiNested[T](): T = throw TedisException(MULTI_NESTED)
   def protocolError[T](): T = throw TedisException(PROTOCOL_ERROR)
+  def numberFormatError[T](): T = throw TedisException(WRONG_NUMBER_FORMAT)
 }

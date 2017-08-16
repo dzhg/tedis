@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.commands.StringCommands.{MsetCmd, SetCmd, SimpleSetCmd}
+import com.github.dzhg.tedis.commands.StringCommands._
 import com.github.dzhg.tedis.utils.TedisSuite
 import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 
@@ -95,6 +95,47 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       val e = the [TedisException] thrownBy parser(params)
       e.error must be (SYNTAX_ERROR.error)
       e.msg must be (SYNTAX_ERROR.msg)
+    }
+
+    "parse 'getset key value'" in {
+      val params = CommandParams("GETSET", List("key", "value"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [GetsetCmd]
+      val getset = cmd.asInstanceOf[GetsetCmd]
+      getset.key must be ("key")
+      getset.value must be ("value")
+    }
+
+    "throw wrong number of arguments for 'getset key'" in {
+      val params = CommandParams("GETSET", List("key"))
+
+      parser.isDefinedAt(params) must be (true)
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("GETSET"))
+    }
+
+    "parse 'setex key 100 value'" in {
+      val params = CommandParams("SETEX", List("key", "100", "value"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [SetexCmd]
+      val setex = cmd.asInstanceOf[SetexCmd]
+      setex.key must be ("key")
+      setex.value must be ("value")
+      setex.expiry must be (100)
+    }
+
+    "throw wrong number of arguments for 'setex key 100'" in {
+      val params = CommandParams("SETEX", List("key", "100"))
+
+      parser.isDefinedAt(params) must be (true)
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("SETEX"))
     }
   }
 }

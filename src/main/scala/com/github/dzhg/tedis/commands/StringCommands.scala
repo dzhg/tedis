@@ -5,6 +5,8 @@ import com.github.dzhg.tedis.protocol.RESP
 import com.github.dzhg.tedis.protocol.RESP.{ArrayValue, BulkStringValue, RESPValue, SimpleStringValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisString}
 
+import scala.util.Try
+
 /**
   * @author dzhg 8/11/17
   */
@@ -63,13 +65,24 @@ object StringCommands extends Helpers with TedisErrors {
     override def resultToRESP(vs: Seq[Option[String]]): RESPValue = ArrayValue(Some(vs.map(BulkStringValue)))
   }
 
-  case class SetexCmd(key: String, expiry: Integer, value: String) extends TedisCommand[Boolean] {
+  case class SetexCmd(key: String, expiry: Long, value: String) extends TedisCommand[Boolean] {
     override def exec(storage: TedisStorage): Boolean = {
-      storage.put(key, TedisEntry(keyInfo(key, expiry.toLong * 1000), TedisString(value)))
+      storage.put(key, TedisEntry(keyInfo(key, expiry * 1000), TedisString(value)))
       true
     }
 
     override def resultToRESP(v: Boolean): RESPValue = OK
+  }
+
+  case class GetsetCmd(key: String, value: String) extends TedisCommand[Option[String]] {
+    override def exec(storage: TedisStorage): Option[String] = {
+      storage.put(key, TedisEntry(keyInfo(key), TedisString(value))).map {
+        case TedisEntry(_, TedisString(v)) => v
+        case _ => wrongType()
+      }
+    }
+
+    override def resultToRESP(v: Option[String]): RESPValue = BulkStringValue(v)
   }
 
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {
@@ -96,6 +109,11 @@ object StringCommands extends Helpers with TedisErrors {
       case BulkStringValue(Some(k)) => k
       case _ => syntaxError()
     }: _*)
+    case CommandParams("GETSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil) => GetsetCmd(key, value)
+    case CommandParams("GETSET", _) => wrongNumberOfArguments("GETSET")
+    case CommandParams("SETEX", BulkStringValue(Some(key)) :: BulkStringValue(Some(expiry)) :: BulkStringValue(Some(value)) :: Nil) =>
+      Try(SetexCmd(key, expiry.toLong, value)).getOrElse(numberFormatError())
+    case CommandParams("SETEX", _) => wrongNumberOfArguments("SETEX")
   }
 
   def parseSetCmd(params: List[RESPValue]): TedisCommand[_] = params match {
