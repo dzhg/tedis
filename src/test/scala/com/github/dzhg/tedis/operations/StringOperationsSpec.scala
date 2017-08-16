@@ -66,7 +66,7 @@ class StringOperationsSpec extends TedisSuite {
   "set(key, value, time)" must {
     "set ttl correctly" in {
       val ops = instance()
-      ops.set("key1", "value1", Some(100L))
+      ops.set("key1", "value1", Some(5000L))
 
       val ttl = ops.ttl("key1")
       ttl must be > 0L
