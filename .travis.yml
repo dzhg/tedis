@@ -16,3 +16,4 @@ script:
    - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
 after_success:
   - sbt coverageReport coveralls
+  - bash <(curl -s https://codecov.io/bash)
