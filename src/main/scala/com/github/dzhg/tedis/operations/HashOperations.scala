@@ -1,12 +1,13 @@
 package com.github.dzhg.tedis.operations
 
 import com.github.dzhg.tedis.commands.HashCommands.{HgetCmd, HsetCmd}
-import com.github.dzhg.tedis.{CommandExecutor, Helpers, TedisException}
+import com.github.dzhg.tedis.commands.CommandHelper
+import com.github.dzhg.tedis.{CommandExecutor, TedisException}
 
 /**
   * @author dzhg 8/11/17
   */
-trait HashOperations extends Helpers {
+trait HashOperations extends CommandHelper {
   this: CommandExecutor =>
 
   /**

@@ -10,7 +10,7 @@ import scala.util.Try
 /**
   * @author dzhg 8/11/17
   */
-object StringCommands extends Helpers with TedisErrors {
+object StringCommands extends TedisErrors {
   case class SimpleSetCmd(key: String, value: String, time: Option[Long]) extends TedisCommand[Boolean] {
     override def exec(storage: TedisStorage): Boolean = {
       val ki = TedisKeyInfo(key, time, System.currentTimeMillis())
@@ -18,8 +18,6 @@ object StringCommands extends Helpers with TedisErrors {
       storage.put(key, entry)
       true
     }
-
-    override def resultToRESP(v: Boolean): RESP.RESPValue = OK
   }
 
   case class SetCmd(key: String, value: String, onlyIfExists: Boolean, time: Option[Long]) extends TedisCommand[Boolean] {
@@ -53,8 +51,6 @@ object StringCommands extends Helpers with TedisErrors {
       storage.putAll(m)
       true
     }
-
-    override def resultToRESP(v: Boolean): RESPValue = OK
   }
 
   case class MgetCmd(keys: String*) extends TedisCommand[Seq[Option[String]]] {
@@ -70,8 +66,6 @@ object StringCommands extends Helpers with TedisErrors {
       storage.put(key, TedisEntry(keyInfo(key, expiry * 1000), TedisString(value)))
       true
     }
-
-    override def resultToRESP(v: Boolean): RESPValue = OK
   }
 
   case class GetsetCmd(key: String, value: String) extends TedisCommand[Option[String]] {

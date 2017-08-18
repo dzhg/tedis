@@ -1,4 +1,4 @@
-package com.github.dzhg.tedis
+package com.github.dzhg.tedis.commands
 
 import com.github.dzhg.tedis.protocol.RESP.SimpleStringValue
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisValue}
@@ -6,7 +6,7 @@ import com.github.dzhg.tedis.storage.{TedisEntry, TedisKeyInfo, TedisValue}
 /**
   * @author dzhg 8/11/17
   */
-trait Helpers {
+trait CommandHelper {
 
   def keyInfo(key: String): TedisKeyInfo = TedisKeyInfo(key, None, System.currentTimeMillis())
 

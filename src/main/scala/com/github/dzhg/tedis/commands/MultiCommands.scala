@@ -3,28 +3,26 @@ package com.github.dzhg.tedis.commands
 import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.protocol.RESP.RESPValue
 
-object MultiCommands extends Helpers with TedisErrors {
+object MultiCommands extends CommandHelper with TedisErrors {
 
   case object MultiCmd extends TedisCommand[Boolean] {
     override def exec(storage: TedisStorage): Boolean = true
 
-    override def resultToRESP(v: Boolean): RESPValue = OK
-
-    override def needLock = false
+    override def requireLock = false
   }
 
   case object ExecCmd extends TedisCommand[Boolean] {
     override def exec(storage: TedisStorage): Boolean =
       throw TedisException("ERR", "EXEC without MULTI")
 
-    override def needLock = false
+    override def requireLock = false
   }
 
   case object DiscardCmd extends TedisCommand[Boolean] {
     override def exec(storage: TedisStorage): Boolean =
       throw TedisException("ERR", "DISCARD without MULTI")
 
-    override def needLock = false
+    override def requireLock = false
   }
 
   val Parser: CommandParser = {

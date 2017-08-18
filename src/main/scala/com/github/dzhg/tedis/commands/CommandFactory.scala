@@ -1,11 +1,11 @@
 package com.github.dzhg.tedis.commands
 
 import com.github.dzhg.tedis.protocol.RESP._
-import com.github.dzhg.tedis.{CommandParser, Helpers, TedisErrors}
+import com.github.dzhg.tedis.{CommandParser, TedisErrors}
 
 case class CommandParams(cmd: String, params: List[RESPValue])
 
-trait CommandFactory extends Helpers with TedisErrors {
+trait CommandFactory extends CommandHelper with TedisErrors {
   def make(input: ArrayValue): TedisCommand[_] = input match {
     case ArrayValue(None) => protocolError()
     case ArrayValue(Some(vs)) =>

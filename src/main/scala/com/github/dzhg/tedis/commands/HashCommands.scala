@@ -8,7 +8,7 @@ import com.github.dzhg.tedis.storage.TedisHash
 /**
   * @author dzhg 8/11/17
   */
-object HashCommands extends Helpers with TedisErrors {
+object HashCommands extends TedisErrors {
   case class HsetCmd(key: String, field: String, value: String) extends TedisCommand[Long] {
     override def exec(storage: TedisStorage): Long = {
       storage.get(key) match {

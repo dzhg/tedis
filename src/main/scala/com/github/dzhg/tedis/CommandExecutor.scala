@@ -11,11 +11,11 @@ trait CommandExecutor {
 
   def executeUnlocked[T](cmd: TedisCommand[T]): T = withoutLock { storage => cmd.exec(storage) }
 
-  def execute[T](cmd: TedisCommand[T]): T = if (cmd.needLock) withLock { storage => cmd.exec(storage) } else executeUnlocked(cmd)
+  def execute[T](cmd: TedisCommand[T]): T = if (cmd.requireLock) withLock { storage => cmd.exec(storage) } else executeUnlocked(cmd)
 
   def executeAll(cmds: Seq[TedisCommand[_]]): Seq[Any] = withLock { storage => cmds.map(_.exec(storage)) }
 
-  def executeToRESP(cmd: TedisCommand[_]): RESPValue = if (cmd.needLock) {
+  def executeToRESP(cmd: TedisCommand[_]): RESPValue = if (cmd.requireLock) {
     withLock { storage => cmd.execToRESP(storage) }
   } else {
     withoutLock { storage => cmd.execToRESP(storage) }
