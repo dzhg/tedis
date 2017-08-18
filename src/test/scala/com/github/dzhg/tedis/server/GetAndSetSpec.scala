@@ -85,7 +85,20 @@ class GetAndSetSpec extends TedisSuite with ServerAndClient {
 
     "setex(key, expiry, value)" must {
       "set the value and expiry" in {
-        val result = client.setex("key", 5000, "value")
+        val result = client.setex("key", 5, "value")
+        result must be (true)
+
+        val v = client.get("key")
+        v.value must be ("value")
+
+        val ttl = client.ttl("key")
+        ttl.value must be > 0L
+      }
+    }
+
+    "psetex(key, expiry, value)" must {
+      "set the value and expiry" in {
+        val result = client.psetex("key", 5000, "value")
         result must be (true)
 
         val v = client.get("key")

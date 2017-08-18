@@ -35,18 +35,18 @@ val v = client.get("key")
 
 ## Command supported
 
-![Command Support Progress](https://img.shields.io/badge/progress-12%2F200-orange.svg)
+![Command Support Progress](https://img.shields.io/badge/progress-13%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
-Currently supported by Tedis: 12
+Currently supported by Tedis: 13
 
  * [PING](https://redis.io/commands/ping)
  * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
  * [SET](https://redis.io/commands/set) and [GET](https://redis.io/commands/get)
  * [MSET](https://redis.io/commands/mset) and [MGET](https://redis.io/commands/mget)
  * [TTL](https://redis.io/commands/ttl) and [PTTL](https://redis.io/commands/pttl)
- * [GETSET](https://redis.io/commands/getset) and [SETEX](https://redis.io/commands/setex)
+ * [GETSET](https://redis.io/commands/getset) and [SETEX](https://redis.io/commands/setex) / [PSETEX](https://redis.io/commands/psetex)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |

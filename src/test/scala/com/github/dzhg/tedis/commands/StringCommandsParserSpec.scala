@@ -73,6 +73,16 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       e.msg must be (SYNTAX_ERROR.msg)
     }
 
+    "throw syntax error for 'set key value ex 10 nx abc'" in {
+      val params = CommandParams("SET", List(
+        "key", "value", "ex", "10", "nx", "abc"
+      ))
+
+      val e = the [TedisException] thrownBy parser.apply(params)
+      e.error must be (SYNTAX_ERROR.error)
+      e.msg must be (SYNTAX_ERROR.msg)
+    }
+
     "parse 'mset k1 v1 k2 v2 k3 v3'" in {
       val params = CommandParams("MSET", List(
         "k1", "v1", "k2", "v2", "k3", "v3"
@@ -93,8 +103,8 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       ))
 
       val e = the [TedisException] thrownBy parser(params)
-      e.error must be (SYNTAX_ERROR.error)
-      e.msg must be (SYNTAX_ERROR.msg)
+      e.error must be (WRONG_NUMBER_OF_ARGS.error)
+      e.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("MSET"))
     }
 
     "parse 'getset key value'" in {
@@ -136,6 +146,27 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       val ex = the [TedisException] thrownBy parser(params)
       ex.error must be (WRONG_NUMBER_OF_ARGS.error)
       ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("SETEX"))
+    }
+
+    "parse 'psetex key 10000 value'" in {
+      val params = CommandParams("PSETEX", List("key", "10000", "value"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [PsetexCmd]
+      val psetex = cmd.asInstanceOf[PsetexCmd]
+      psetex.key must be ("key")
+      psetex.value must be ("value")
+      psetex.expiry must be (10000)
+    }
+
+    "throw wrong number of arguments for 'psetex key 10000'" in {
+      val params = CommandParams("PSETEX", List("key", "10000"))
+
+      parser.isDefinedAt(params) must be (true)
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("PSETEX"))
     }
   }
 }

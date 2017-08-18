@@ -68,6 +68,13 @@ object StringCommands extends TedisErrors {
     }
   }
 
+  case class PsetexCmd(key: String, expiry: Long, value: String) extends TedisCommand[Boolean] {
+    override def exec(storage: TedisStorage): Boolean = {
+      storage.put(key, TedisEntry(keyInfo(key, expiry), TedisString(value)))
+      true
+    }
+  }
+
   case class GetsetCmd(key: String, value: String) extends TedisCommand[Option[String]] {
     override def exec(storage: TedisStorage): Option[String] = {
       storage.put(key, TedisEntry(keyInfo(key), TedisString(value))).map {
@@ -89,7 +96,7 @@ object StringCommands extends TedisErrors {
     case CommandParams("GET", params) => parseGetCmd(params)
     case CommandParams("MSET", params) =>
       if (params.size % 2 != 0) {
-        syntaxError()
+        wrongNumberOfArguments("MSET")
       } else {
         val kvs = params.grouped(2).foldLeft(Seq.empty[(String, String)]) { (kvs, pair) =>
           pair match {
@@ -108,6 +115,9 @@ object StringCommands extends TedisErrors {
     case CommandParams("SETEX", BulkStringValue(Some(key)) :: BulkStringValue(Some(expiry)) :: BulkStringValue(Some(value)) :: Nil) =>
       Try(SetexCmd(key, expiry.toLong, value)).getOrElse(numberFormatError())
     case CommandParams("SETEX", _) => wrongNumberOfArguments("SETEX")
+    case CommandParams("PSETEX", BulkStringValue(Some(key)) :: BulkStringValue(Some(expiry)) :: BulkStringValue(Some(value)) :: Nil) =>
+      Try(PsetexCmd(key, expiry.toLong, value)).getOrElse(numberFormatError())
+    case CommandParams("PSETEX", _) => wrongNumberOfArguments("PSETEX")
   }
 
   def parseSetCmd(params: List[RESPValue]): TedisCommand[_] = params match {
