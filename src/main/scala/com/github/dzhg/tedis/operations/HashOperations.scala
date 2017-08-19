@@ -7,7 +7,7 @@ import com.github.dzhg.tedis.{CommandExecutor, TedisException}
 /**
   * @author dzhg 8/11/17
   */
-trait HashOperations extends CommandHelper {
+trait HashOperations {
   this: CommandExecutor =>
 
   /**

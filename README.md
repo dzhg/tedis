@@ -1,7 +1,8 @@
 # Tedis (A Redis Implementation in Scala for Unit Testing)
 
 [![Build Status](https://img.shields.io/travis/dzhg/tedis/master.svg)](https://travis-ci.org/dzhg/tedis) 
-[![Coverage Status](https://img.shields.io/coveralls/dzhg/tedis/master.svg)](https://coveralls.io/github/dzhg/tedis?branch=master)
+[![Coveralls](https://img.shields.io/coveralls/dzhg/tedis/master.svg)](https://coveralls.io/github/dzhg/tedis?branch=master)
+[![Codecov](https://img.shields.io/codecov/c/github/dzhg/tedis.svg)](https://codecov.io/gh/dzhg/tedis)
 
 ## Key features
 
@@ -35,11 +36,11 @@ val v = client.get("key")
 
 ## Command supported
 
-![Command Support Progress](https://img.shields.io/badge/progress-13%2F200-orange.svg)
+![Command Support Progress](https://img.shields.io/badge/progress-18%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
-Currently supported by Tedis: 13
+Currently supported by Tedis: 18
 
  * [PING](https://redis.io/commands/ping)
  * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
@@ -47,6 +48,7 @@ Currently supported by Tedis: 13
  * [MSET](https://redis.io/commands/mset) and [MGET](https://redis.io/commands/mget)
  * [TTL](https://redis.io/commands/ttl) and [PTTL](https://redis.io/commands/pttl)
  * [GETSET](https://redis.io/commands/getset) and [SETEX](https://redis.io/commands/setex) / [PSETEX](https://redis.io/commands/psetex)
+ * [INCR](https://redis.io/commands/incr), [INCRBY](https://redis.io/commands/incrby), [DECR](https://redis.io/commands/decr), [DECRBY](https://redis.io/commands/decrby) and [INCRBYFLOAT](https://redis.io/commands/incrbyfloat)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |

@@ -168,5 +168,81 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       ex.error must be (WRONG_NUMBER_OF_ARGS.error)
       ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("PSETEX"))
     }
+
+    "parse 'incr key'" in {
+      val params = CommandParams("INCR", List("key"))
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [IncrCmd]
+      val incrCmd = cmd.asInstanceOf[IncrCmd]
+      incrCmd.key must be ("key")
+    }
+
+    "parse 'incrby key 3'" in {
+      val params = CommandParams("INCRBY", List("key", "3"))
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [IncrByCmd]
+      val incrByCmd = cmd.asInstanceOf[IncrByCmd]
+      incrByCmd.key must be ("key")
+      incrByCmd.by must be (3L)
+    }
+
+    "parse 'incrbyfloat key 1.25'" in {
+      val params = CommandParams("INCRBYFLOAT", List("key", "1.25"))
+
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe an [IncrByFloatCmd]
+      val incrByFloatCmd = cmd.asInstanceOf[IncrByFloatCmd]
+      incrByFloatCmd.key must be ("key")
+      incrByFloatCmd.by must be (1.25F)
+    }
+
+    "parse 'decr key'" in {
+      val params = CommandParams("DECR", List("key"))
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [DecrCmd]
+      val decrCmd = cmd.asInstanceOf[DecrCmd]
+      decrCmd.key must be ("key")
+    }
+
+    "parse 'decrby key 3'" in {
+      val params = CommandParams("DECRBY", List("key", "3"))
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [DecrByCmd]
+      val decrByCmd = cmd.asInstanceOf[DecrByCmd]
+      decrByCmd.key must be ("key")
+      decrByCmd.by must be (3L)
+    }
+
+    "throw wrong number of arguments for 'incr key 123'" in {
+      val params = CommandParams("INCR", List("key", "123"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("INCR"))
+    }
+
+    "throw wrong number of arguments for 'incrby key'" in {
+      val params = CommandParams("INCRBY", List("key"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("INCRBY"))
+    }
+
+    "throw wrong number format for 'incrby key abc'" in {
+      val params = CommandParams("INCRBY", List("key", "abc"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_FORMAT.error)
+      ex.msg must be (WRONG_NUMBER_FORMAT.msg)
+    }
   }
 }

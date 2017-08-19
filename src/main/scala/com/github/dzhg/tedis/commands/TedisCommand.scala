@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.protocol.RESP.RESPValue
+import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue, RESPValue}
 import com.github.dzhg.tedis.TedisStorage
 
 /**
@@ -13,3 +13,12 @@ trait TedisCommand[T] extends CommandHelper {
   def requireLock: Boolean = true
 }
 
+trait AsIntegerResult {
+  this: TedisCommand[Long] =>
+  override def resultToRESP(v: Long): RESPValue = IntegerValue(v)
+}
+
+trait AsBulkStringResult {
+  this: TedisCommand[Option[String]] =>
+  override def resultToRESP(v: Option[String]): RESPValue = BulkStringValue(v)
+}
