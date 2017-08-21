@@ -21,6 +21,7 @@ trait CommandFactory extends CommandHelper with TedisErrors {
       ServerCommands.Parser orElse
       StringCommands.Parser orElse
       MultiCommands.Parser orElse
+      HashCommands.Parsers orElse
       KeyCommands.Parser
 
   def default: CommandParser = {
