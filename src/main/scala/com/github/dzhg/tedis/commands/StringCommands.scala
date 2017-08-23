@@ -75,7 +75,7 @@ object StringCommands extends TedisErrors {
 
   case class GetsetCmd(key: String, value: String) extends TedisCommand[Option[String]] with AsBulkStringResult {
     override def exec(storage: TedisStorage): Option[String] = {
-      storage.put(key, TedisEntry(keyInfo(key), TedisString(value))).map {
+      storage.put(key, entry(key, TedisString(value))).map {
         case TedisEntry(_, TedisString(v)) => v
         case _ => wrongType()
       }
@@ -131,6 +131,16 @@ object StringCommands extends TedisErrors {
     override def exec(storage: TedisStorage): Long = IncrByCmd(key, -by).exec(storage)
   }
 
+  case class MsetnxCmd(kvs: (String, String)*) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      val keys = kvs.map(_._1)
+      val existed = MgetCmd(keys: _*).exec(storage).exists(_.isDefined)
+
+      if (!existed && MsetCmd(kvs: _*).exec(storage)) 1
+      else 0
+    }
+  }
+
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {
     case s: TedisString => Some(s)
     case _ => None
@@ -141,18 +151,7 @@ object StringCommands extends TedisErrors {
   val Parser: CommandParser = {
     case CommandParams("SET", params) => parseSetCmd(params)
     case CommandParams("GET", params) => parseGetCmd(params)
-    case CommandParams("MSET", params) =>
-      if (params.size % 2 != 0) {
-        wrongNumberOfArguments("MSET")
-      } else {
-        val kvs = params.grouped(2).foldLeft(Seq.empty[(String, String)]) { (kvs, pair) =>
-          pair match {
-            case BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil => kvs :+ (key, value)
-            case _ => syntaxError()
-          }
-        }
-        MsetCmd(kvs: _*)
-      }
+    case CommandParams("MSET", params) => parseMsetCmds[MsetCmd]("MSET", params, MsetCmd.apply)
     case CommandParams("MGET", params) => MgetCmd(params.map {
       case BulkStringValue(Some(k)) => k
       case _ => syntaxError()
@@ -170,7 +169,22 @@ object StringCommands extends TedisErrors {
       Try(DecrByCmd(key, by.toLong)).getOrElse(numberFormatError())
     case CommandParams("INCRBYFLOAT", BulkStringValue(Some(key)) :: BulkStringValue(Some(by)) :: Nil) =>
       Try(IncrByFloatCmd(key, by.toFloat)).getOrElse(numberFormatError())
+    case CommandParams("MSETNX", params) => parseMsetCmds[MsetnxCmd]("MSETNX", params, MsetnxCmd.apply)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
+  }
+
+  def parseMsetCmds[T](cmd: String, params: List[RESPValue], f: Seq[(String, String)] => T): T = {
+    if (params.size % 2 != 0) {
+      wrongNumberOfArguments(cmd)
+    } else {
+      val kvs = params.grouped(2).foldLeft(Seq.empty[(String, String)]) { (kvs, pair) =>
+        pair match {
+          case BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil => kvs :+ (key, value)
+          case _ => syntaxError()
+        }
+      }
+      f(kvs)
+    }
   }
 
   def parseSetCmd(params: List[RESPValue]): TedisCommand[_] = params match {

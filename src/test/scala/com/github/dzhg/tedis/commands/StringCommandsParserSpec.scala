@@ -5,6 +5,7 @@ import com.github.dzhg.tedis.utils.TedisSuite
 import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 
 import scala.language.implicitConversions
+import scala.reflect.ClassTag
 
 class StringCommandsParserSpec extends TedisSuite with TedisErrors {
 
@@ -243,6 +244,24 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       val ex = the [TedisException] thrownBy parser(params)
       ex.error must be (WRONG_NUMBER_FORMAT.error)
       ex.msg must be (WRONG_NUMBER_FORMAT.msg)
+    }
+
+    "parse 'msetnx k1 v1 k2 v2'" in {
+      val params = CommandParams("MSETNX", List("k1", "v1", "k2", "v2"))
+
+      val cmd = parser(params)
+      cmd mustBe a [MsetnxCmd]
+
+      val msetnxCmd = cmd.asInstanceOf[MsetnxCmd]
+      msetnxCmd.kvs must have size 2
+    }
+
+    "throw wrong number of arguments for 'msetnx k1 v1 k2'" in {
+      val params = CommandParams("MSETNX", List("k1", "v1", "k2"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("MSETNX"))
     }
   }
 }
