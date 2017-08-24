@@ -5,7 +5,6 @@ import com.github.dzhg.tedis.utils.TedisSuite
 import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 
 import scala.language.implicitConversions
-import scala.reflect.ClassTag
 
 class StringCommandsParserSpec extends TedisSuite with TedisErrors {
 
@@ -262,6 +261,55 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       val ex = the [TedisException] thrownBy parser(params)
       ex.error must be (WRONG_NUMBER_OF_ARGS.error)
       ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("MSETNX"))
+    }
+
+    "parse 'setrange key 10 value'" in {
+      val params = CommandParams("SETRANGE", List("key", "10", "value"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [SetrangeCmd]
+
+      val setrangeCmd = cmd.asInstanceOf[SetrangeCmd]
+      setrangeCmd.key must be ("key")
+      setrangeCmd.offset must be (10L)
+      setrangeCmd.value must be ("value")
+    }
+
+    "throw wrong number format for 'setrange key abc abc'" in {
+      val params = CommandParams("SETRANGE", List("key", "abc", "abc"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_FORMAT.error)
+      ex.msg must be (WRONG_NUMBER_FORMAT.msg)
+    }
+
+    "throw wrong number of arguments for 'setrange key'" in {
+      val params = CommandParams("SETRANGE", List("key"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("SETRANGE"))
+    }
+
+    "parse 'getrange key 0 1'" in {
+      val params = CommandParams("GETRANGE", List("key", "0", "1"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [GetrangeCmd]
+      val getrangeCmd = cmd.asInstanceOf[GetrangeCmd]
+      getrangeCmd.key must be ("key")
+      getrangeCmd.start must be (0L)
+      getrangeCmd.end must be (1L)
+    }
+
+    "throw wrong number format for 'getrange key a b'" in {
+      val params = CommandParams("GETRANGE", List("key", "a", "b"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_FORMAT.error)
+      ex.msg must be (WRONG_NUMBER_FORMAT.msg)
     }
   }
 }

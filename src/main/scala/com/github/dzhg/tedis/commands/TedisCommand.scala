@@ -22,3 +22,8 @@ trait AsBulkStringResult {
   this: TedisCommand[Option[String]] =>
   override def resultToRESP(v: Option[String]): RESPValue = BulkStringValue(v)
 }
+
+trait AsNonNilBulkStringResult {
+  this: TedisCommand[String] =>
+  override def resultToRESP(v: String): RESPValue = BulkStringValue(Some(v))
+}

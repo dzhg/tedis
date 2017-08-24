@@ -141,12 +141,56 @@ object StringCommands extends TedisErrors {
     }
   }
 
+  case class SetrangeCmd(key: String, offset: Long, value: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case Some(TedisEntry(keyInfo, TedisString(str))) => setrange(storage, keyInfo, offset, str, value)
+        case None => setrange(storage, keyInfo(key), offset, "", value)
+        case _ => wrongType()
+      }
+    }
+
+    private def setrange(storage: TedisStorage, keyInfo: TedisKeyInfo, offset: Long, original: String, value: String): Long = {
+      val padded = padding(original, offset)
+      val result = padded.substring(0, offset.toInt).concat(value)
+      storage.put(keyInfo.name, TedisEntry(keyInfo, TedisString(result)))
+      result.length.toLong
+    }
+
+    private def padding(v: String, length: Long): String = {
+      if (v.length >= length) v
+      else 0.to(length.toInt - v.length).foldLeft(v) { (s, _) => s + "\0" }
+    }
+  }
+
+  case class GetrangeCmd(key: String, start: Long, end: Long) extends TedisCommand[String] with AsNonNilBulkStringResult {
+    override def exec(storage: TedisStorage): String = {
+      storage.get(key) map {
+        case TedisEntry(_, TedisString(str)) =>
+          val (beginIdx, endIdx) = calculateIndex(str.length, start, end)
+          str.substring(beginIdx, endIdx)
+        case _ => wrongType()
+      } getOrElse ""
+    }
+
+    // start and end are both inclusive, so the calculated end index shall be increased by 1
+    private def calculateIndex(length: Int, start: Long, end: Long): (Int, Int) = {
+      val positiveStart = if (start < 0) length + start.toInt else start.toInt
+      val positiveEnd = if (end < 0) length + end.toInt else end.toInt
+
+      if (positiveStart > positiveEnd) (0, 0)
+      else if (positiveEnd + 1 > length) (positiveStart, length)
+      else (positiveStart, positiveEnd + 1)
+    }
+  }
+
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {
     case s: TedisString => Some(s)
     case _ => None
   }
 
-  val COMMANDS: Set[String] = Set("SET", "GET", "MSET", "MGET", "GETSET", "SETEX", "PSETEX", "INCR", "INCRBY")
+  val COMMANDS: Set[String] = Set("SET", "GET", "MSET", "MGET", "GETSET", "SETEX", "PSETEX", "INCR", "INCRBY", "DECRBY",
+    "INCRBYFLOAT", "MSETNX", "SETRANGE", "GETRANGE")
 
   val Parser: CommandParser = {
     case CommandParams("SET", params) => parseSetCmd(params)
@@ -170,6 +214,10 @@ object StringCommands extends TedisErrors {
     case CommandParams("INCRBYFLOAT", BulkStringValue(Some(key)) :: BulkStringValue(Some(by)) :: Nil) =>
       Try(IncrByFloatCmd(key, by.toFloat)).getOrElse(numberFormatError())
     case CommandParams("MSETNX", params) => parseMsetCmds[MsetnxCmd]("MSETNX", params, MsetnxCmd.apply)
+    case CommandParams("SETRANGE", BulkStringValue(Some(key)) :: BulkStringValue(Some(offset)) :: BulkStringValue(Some(value)) :: Nil) =>
+      Try(SetrangeCmd(key, offset.toLong, value)).getOrElse(numberFormatError())
+    case CommandParams("GETRANGE", BulkStringValue(Some(key)) :: BulkStringValue(Some(start)) :: BulkStringValue(Some(end)) :: Nil) =>
+      Try(GetrangeCmd(key, start.toLong, end.toLong)).getOrElse(numberFormatError())
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 
