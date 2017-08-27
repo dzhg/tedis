@@ -311,5 +311,39 @@ class StringCommandsParserSpec extends TedisSuite with TedisErrors {
       ex.error must be (WRONG_NUMBER_FORMAT.error)
       ex.msg must be (WRONG_NUMBER_FORMAT.msg)
     }
+
+    "parse 'strlen key'" in {
+      val params = CommandParams("STRLEN", List("key"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [StrlenCmd]
+      cmd.asInstanceOf[StrlenCmd].key must be ("key")
+    }
+
+    "throw wrong number of arguments for 'strlen key1 key2'" in {
+      val params = CommandParams("STRLEN", List("key1", "key2"))
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("STRLEN"))
+    }
+
+    "parse 'append key value'" in {
+      val params = CommandParams("APPEND", List("key", "value"))
+
+      parser.isDefinedAt(params) must be (true)
+      val cmd = parser(params)
+      cmd mustBe a [AppendCmd]
+      val appendCmd = cmd.asInstanceOf[AppendCmd]
+      appendCmd.key must be ("key")
+      appendCmd.value must be ("value")
+    }
+
+    "throw wrong number of arguments for 'append key'" in {
+      val params = CommandParams("APPEND", List("key"))
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("APPEND"))
+    }
   }
 }

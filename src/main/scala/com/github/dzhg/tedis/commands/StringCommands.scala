@@ -184,13 +184,37 @@ object StringCommands extends TedisErrors {
     }
   }
 
+  case class StrlenCmd(key: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) map {
+        case TedisEntry(_, TedisString(str)) => str.length.toLong
+        case _ => wrongType()
+      } getOrElse 0L
+    }
+  }
+
+  case class AppendCmd(key: String, value: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) map {
+        case TedisEntry(keyInfo, TedisString(str)) =>
+          val v = str + value
+          storage.put(key, TedisEntry(keyInfo, TedisString(v)))
+          v.length.toLong
+        case _ => wrongType()
+      } getOrElse {
+        storage.put(key, entry(key, TedisString(value)))
+        value.length
+      }
+    }
+  }
+
   private def extractStringValue(entry: TedisEntry): Option[String] = entry.value match {
     case s: TedisString => Some(s)
     case _ => None
   }
 
   val COMMANDS: Set[String] = Set("SET", "GET", "MSET", "MGET", "GETSET", "SETEX", "PSETEX", "INCR", "INCRBY", "DECRBY",
-    "INCRBYFLOAT", "MSETNX", "SETRANGE", "GETRANGE")
+    "INCRBYFLOAT", "MSETNX", "SETRANGE", "GETRANGE", "STRLEN", "APPEND")
 
   val Parser: CommandParser = {
     case CommandParams("SET", params) => parseSetCmd(params)
@@ -218,6 +242,8 @@ object StringCommands extends TedisErrors {
       Try(SetrangeCmd(key, offset.toLong, value)).getOrElse(numberFormatError())
     case CommandParams("GETRANGE", BulkStringValue(Some(key)) :: BulkStringValue(Some(start)) :: BulkStringValue(Some(end)) :: Nil) =>
       Try(GetrangeCmd(key, start.toLong, end.toLong)).getOrElse(numberFormatError())
+    case CommandParams("STRLEN", BulkStringValue(Some(key)) :: Nil) => StrlenCmd(key)
+    case CommandParams("APPEND", BulkStringValue(Some(key)) :: BulkStringValue(Some(value)) :: Nil) => AppendCmd(key, value)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 
