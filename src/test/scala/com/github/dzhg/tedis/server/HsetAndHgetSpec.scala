@@ -56,5 +56,41 @@ class HsetAndHgetSpec extends TedisSuite with ServerAndClient with TedisErrors {
         ex.getMessage must be (s"${WRONG_TYPE.error} ${WRONG_TYPE.msg}")
       }
     }
+
+    "hsetnx(key, field, value)" must {
+      "set the value if key does not exist" in {
+        val result = client.hsetnx("key", "f1", "v1")
+        result must be (true)
+
+        val v = client.hget("key", "f1")
+        v.value must be ("v1")
+      }
+
+      "not set the value if field exists" in {
+        val result = client.hset("key", "f1", "v1")
+        result must be (true)
+
+        val s = client.hsetnx("key", "f1", "v2")
+        s must be (false)
+
+        val v = client.hget("key", "f1")
+        v.value must be ("v1")
+      }
+
+      "set the value if field does not exist in the hash" in {
+        client.hset("key", "f1", "v1")
+        val b = client.hsetnx("key", "f2", "v2")
+        b must be (true)
+
+        val v = client.hget("key", "f2")
+        v.value must be ("v2")
+      }
+
+      "throw error if key is not a hash" in {
+        client.set("key", "value")
+        val ex = the [Exception] thrownBy client.hsetnx("key", "f1", "v1")
+        ex.getMessage must be (s"${WRONG_TYPE.error} ${WRONG_TYPE.msg}")
+      }
+    }
   }
 }
