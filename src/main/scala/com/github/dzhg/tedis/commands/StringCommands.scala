@@ -159,7 +159,7 @@ object StringCommands extends TedisErrors {
 
     private def padding(v: String, length: Long): String = {
       if (v.length >= length) v
-      else 0.to(length.toInt - v.length).foldLeft(v) { (s, _) => s + "\0" }
+      else 0.to(length.toInt - v.length).foldLeft(v) { (s, _) => s + "\u0000" }
     }
   }
 
