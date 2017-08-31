@@ -52,7 +52,33 @@ object HashCommands extends TedisErrors {
     }
   }
 
-  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX")
+  case class HmsetCmd(key: String, kvs: (String, String)*) extends TedisCommand[Boolean] {
+    override def exec(storage: TedisStorage): Boolean = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, v)) if v.isInstanceOf[TedisHash] =>
+          v.asInstanceOf[TedisHash].putAll(kvs.toSeq)
+          true
+        case None =>
+          storage.put(key, entry(key, TedisHash(kvs:_*)))
+          true
+        case _ => wrongType()
+      }
+    }
+  }
+
+  case class HmgetCmd(key: String, fields: Seq[String]) extends TedisCommand[Seq[Option[String]]] {
+    override def exec(storage: TedisStorage): Seq[Option[String]] = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(kvs))) => fields.map(key => Option(kvs.get(key)))
+        case None => fields.map(_ => None)
+        case _ => wrongType()
+      }
+    }
+
+    override def resultToRESP(v: Seq[Option[String]]): RESP.RESPValue = RESP.ArrayValue(Some(v.map(BulkStringValue)))
+  }
+
+  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -60,6 +86,22 @@ object HashCommands extends TedisErrors {
     case CommandParams("HGET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: Nil) => HgetCmd(key, field)
     case CommandParams("HSETNX", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
       HsetnxCmd(key, field, value)
+    case CommandParams("HMSET", BulkStringValue(Some(key)) :: kvs) =>
+      if (kvs.size % 2 == 0) {
+        val pairs = kvs.grouped(2).map {
+          case BulkStringValue(Some(k)) :: BulkStringValue(Some(v)) :: Nil => (k, v)
+          case _ => syntaxError()
+        }
+        HmsetCmd(key, pairs.toSeq: _*)
+      } else {
+        wrongNumberOfArguments("HMSET")
+      }
+    case CommandParams("HMGET", BulkStringValue(Some(key)) :: keys) =>
+      val ks = keys.map {
+        case BulkStringValue(Some(s)) => s
+        case _ => syntaxError()
+      }
+      HmgetCmd(key, ks)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }

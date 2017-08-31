@@ -1,7 +1,7 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.commands.HashCommands.HsetCmd
-import com.github.dzhg.tedis.{CommandParser, TedisErrors}
+import com.github.dzhg.tedis.commands.HashCommands.{HgetCmd, HmgetCmd, HmsetCmd, HsetCmd}
+import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 import com.github.dzhg.tedis.utils.TedisSuite
 
 class HashCommandsParserSpec extends TedisSuite with TedisErrors {
@@ -19,6 +19,52 @@ class HashCommandsParserSpec extends TedisSuite with TedisErrors {
       hsetCmd.key must be ("key")
       hsetCmd.field must be ("field")
       hsetCmd.value must be ("value")
+    }
+
+    "throw wrong number of arguments for 'hset key f1'" in {
+      val params = CommandParams("HSET", List("key", "f1"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HSET"))
+    }
+
+    "parse 'hget key f1'" in {
+      val params = CommandParams("HGET", List("key", "f1"))
+
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HgetCmd]
+      val hgetCmd = cmd.asInstanceOf[HgetCmd]
+      hgetCmd.key must be ("key")
+      hgetCmd.field must be ("f1")
+    }
+
+    "parse 'hmset key f1 v1 f2 v2'" in {
+      val params = CommandParams("HMSET", List("key", "f1", "v1", "f2", "v2"))
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HmsetCmd]
+      val hmsetCmd = cmd.asInstanceOf[HmsetCmd]
+      hmsetCmd.key must be ("key")
+      hmsetCmd.kvs must have size 2
+      hmsetCmd.kvs.head must be (("f1", "v1"))
+      hmsetCmd.kvs(1) must be (("f2", "v2"))
+    }
+
+    "parse 'hmget key f1 f2'" in {
+      val params = CommandParams("HMGET", List("key", "f1", "f2"))
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HmgetCmd]
+      val hmgetCmd = cmd.asInstanceOf[HmgetCmd]
+      hmgetCmd.key must be ("key")
+      hmgetCmd.fields must have size 2
+      hmgetCmd.fields.head must be ("f1")
+      hmgetCmd.fields(1) must be ("f2")
     }
   }
 }

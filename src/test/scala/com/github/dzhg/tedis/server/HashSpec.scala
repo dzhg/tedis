@@ -3,7 +3,7 @@ package com.github.dzhg.tedis.server
 import com.github.dzhg.tedis.TedisErrors
 import com.github.dzhg.tedis.utils.{ServerAndClient, TedisSuite}
 
-class HsetAndHgetSpec extends TedisSuite with ServerAndClient with TedisErrors {
+class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
 
   "TedisServer" when {
     "hset(key, field, value)" must {
@@ -90,6 +90,49 @@ class HsetAndHgetSpec extends TedisSuite with ServerAndClient with TedisErrors {
         client.set("key", "value")
         val ex = the [Exception] thrownBy client.hsetnx("key", "f1", "v1")
         ex.getMessage must be (s"${WRONG_TYPE.error} ${WRONG_TYPE.msg}")
+      }
+    }
+
+    "hmset(key, ...)" must {
+      "set the value if key does not exist" in {
+        val result = client.hmset("key", Seq(("f1", "v1"), ("f2", "v2")))
+        result must be (true)
+
+        val v1 = client.hget("key", "f1")
+        v1.value must be ("v1")
+
+        val v2 = client.hget("key", "f2")
+        v2.value must be ("v2")
+      }
+
+      "set values if key exists" in {
+        client.hset("key", "f1", "v1")
+        client.hmset("key", Seq("f1" -> "v", "f2" -> "v2"))
+
+        val v1 = client.hget("key", "f1")
+        v1.value must be ("v")
+
+        val v2 = client.hget("key", "f2")
+        v2.value must be ("v2")
+      }
+    }
+
+    "hmget(key, ...)" must {
+      "return all values for fields" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2")))
+        val v = client.hmget("key", "f1", "f2")
+        v.value must be (Map("f1" -> "v1", "f2" -> "v2"))
+      }
+
+      "return correct values if not all fields exist" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f3", "v3")))
+        val v = client.hmget("key", "f1", "f2", "f3")
+        v.value must be (Map("f1" -> "v1", "f3" -> "v3"))
+      }
+
+      "return empty map if the key does not exist" in {
+        val v = client.hmget("key", "f1", "f2")
+        v.value must have size 0
       }
     }
   }

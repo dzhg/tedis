@@ -22,6 +22,7 @@ case class TedisString(value: String) extends TedisValue
 
 case class TedisHash(data: JMap[String, String]) extends TedisValue {
   def apply(field: String): Option[String] = Option(data.get(field))
+  def putAll(kvs: Seq[(String, String)]): Unit = data.putAll(kvs.toMap.asJava)
 }
 
 object TedisHash {

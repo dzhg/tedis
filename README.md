@@ -36,11 +36,11 @@ val v = client.get("key")
 
 ## Command supported
 
-![Command Support Progress](https://img.shields.io/badge/progress-26%2F200-orange.svg)
+![Command Support Progress](https://img.shields.io/badge/progress-28%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
-Currently supported by Tedis: 26
+Currently supported by Tedis: 28
 
  * [PING](https://redis.io/commands/ping)
  * [MULTI](https://redis.io/commands/multi), [EXEC](https://redis.io/commands/exec) and [DISCARD](https://redis.io/commands/discard)
@@ -49,9 +49,10 @@ Currently supported by Tedis: 26
  * [TTL](https://redis.io/commands/ttl) and [PTTL](https://redis.io/commands/pttl)
  * [GETSET](https://redis.io/commands/getset) and [SETEX](https://redis.io/commands/setex) / [PSETEX](https://redis.io/commands/psetex)
  * [INCR](https://redis.io/commands/incr), [INCRBY](https://redis.io/commands/incrby), [DECR](https://redis.io/commands/decr), [DECRBY](https://redis.io/commands/decrby) and [INCRBYFLOAT](https://redis.io/commands/incrbyfloat)
- * [HSET](https://redis.io/commands/hset) / [HSETNX](https://redis.io/commands/hsetnx) and [HGET](https://redis.io/commands/hget)
  * [SETRANGE](https://redis.io/commands/setrange) and [GETRANGE](https://redis.io/commands/getrange)
  * [STRLEN](https://redis.io/commands/strlen) and [APPEND](https://redis.io/commands/append)
+ * [HSET](https://redis.io/commands/hset) / [HSETNX](https://redis.io/commands/hsetnx) and [HGET](https://redis.io/commands/hget)
+ * [HMSET](https://redis.io/commands/hmset) and [HMGET](https://redis.io/commands/hmget)
 
 ## Roadmap
 | Version | Features                                                                 | Schedule  | Status      |
