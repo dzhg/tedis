@@ -1,7 +1,5 @@
 package com.github.dzhg.tedis.commands
 
-import java.util.{HashMap => JHashMap}
-
 import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisHash}

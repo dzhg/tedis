@@ -22,7 +22,7 @@ class RangeSpec extends TedisSuite with ServerAndClient with TedisErrors {
         length.value must be (12)
 
         val v = client.get("key")
-        v.value must be ("ABC\0\0\0Tedis!")
+        v.value must be ("ABC\u0000\u0000\u0000Tedis!")
       }
 
       "padded with zero-bytes if key does not exist" in {
@@ -30,7 +30,7 @@ class RangeSpec extends TedisSuite with ServerAndClient with TedisErrors {
         length.value must be (12)
 
         val v = client.get("key")
-        v.value must be ("\0\0\0\0\0\0Tedis!")
+        v.value must be ("\u0000\u0000\u0000\u0000\u0000\u0000Tedis!")
       }
 
       "return error if key is not string" in {
