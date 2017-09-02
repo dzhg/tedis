@@ -42,9 +42,31 @@ object KeyCommands extends TedisErrors {
     override protected def convert(v: Long): Long = v
   }
 
+  case class ExistsCmd(keys: String*) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      keys.map(key => storage.get(key).map(_ => 1).getOrElse(0)).sum
+    }
+  }
+
+  case class DelCmd(keys: List[String]) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      keys.map(key => storage.removeKey(key)).map(b => if (b) 1 else 0).sum
+    }
+  }
+
+  val COMMANDS: Set[String] = Set("TTL", "PTTL", "EXISTS")
+
   val Parser: CommandParser = {
     case CommandParams("TTL", BulkStringValue(Some(key)) :: Nil) => TtlCmd(key)
     case CommandParams("PTTL", BulkStringValue(Some(key)) :: Nil) => PttlCmd(key)
-    case CommandParams(cmd, _) if cmd == "TTL" || cmd == "PTTL" => wrongNumberOfArguments(cmd)
+    case CommandParams("EXISTS", keys) if keys.nonEmpty => ExistsCmd(keys map {
+      case BulkStringValue(Some(key)) => key
+      case _ => syntaxError()
+    }: _*)
+    case CommandParams("DEL", keys) if keys.nonEmpty => DelCmd(keys map {
+      case BulkStringValue(Some(key)) => key
+      case _ => syntaxError()
+    })
+    case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }
