@@ -78,7 +78,17 @@ object HashCommands extends TedisErrors {
     override def resultToRESP(v: Seq[Option[String]]): RESP.RESPValue = RESP.ArrayValue(Some(v.map(BulkStringValue)))
   }
 
-  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET")
+  case class HexistsCmd(key: String, field: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(kvs))) => if (kvs.containsKey(field)) 1 else 0
+        case None => 0
+        case _ => wrongType()
+      }
+    }
+  }
+
+  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -102,6 +112,7 @@ object HashCommands extends TedisErrors {
         case _ => syntaxError()
       }
       HmgetCmd(key, ks)
+    case CommandParams("HEXISTS", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: Nil) => HexistsCmd(key, field)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }

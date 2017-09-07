@@ -135,5 +135,29 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
         v.value must have size 0
       }
     }
+
+    "hexists(key, field" must {
+      "return true if the hash contains the field" in {
+        client.hset("k1", "f1", "v1")
+        val v = client.hexists("k1", "f1")
+        v must be (true)
+      }
+
+      "return false if key does not exist" in {
+        val v = client.hexists("k1", "f1")
+        v must be (false)
+      }
+
+      "return false if the hash does not contain the field" in {
+        client.hset("k1", "f1", "v1")
+        val v = client.hexists("k1", "f2")
+        v must be (false)
+      }
+
+      "throw error if key is not hash" in {
+        client.set("key", "value")
+        an [Exception] mustBe thrownBy (client.hexists("key", "field"))
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.commands.HashCommands.{HgetCmd, HmgetCmd, HmsetCmd, HsetCmd}
+import com.github.dzhg.tedis.commands.HashCommands._
 import com.github.dzhg.tedis.{CommandParser, TedisErrors, TedisException}
 import com.github.dzhg.tedis.utils.TedisSuite
 
@@ -65,6 +65,27 @@ class HashCommandsParserSpec extends TedisSuite with TedisErrors {
       hmgetCmd.fields must have size 2
       hmgetCmd.fields.head must be ("f1")
       hmgetCmd.fields(1) must be ("f2")
+    }
+
+    "parse 'hexists key field'" in {
+      val params = CommandParams("HEXISTS", List("key", "field"))
+
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HexistsCmd]
+
+      val hexistsCmd = cmd.asInstanceOf[HexistsCmd]
+      hexistsCmd.key must be ("key")
+      hexistsCmd.field must be ("field")
+    }
+
+    "throw wrong number of arguments for 'hexists key'" in {
+      val params = CommandParams("HEXISTS", List("key"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HEXISTS"))
     }
   }
 }
