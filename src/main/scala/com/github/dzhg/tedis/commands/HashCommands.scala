@@ -4,6 +4,8 @@ import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisHash}
 
+import scala.util.Try
+
 /**
   * @author dzhg 8/11/17
   */
@@ -88,7 +90,25 @@ object HashCommands extends TedisErrors {
     }
   }
 
-  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS")
+  case class HdelCmd(key: String, fields: Seq[String]) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(hash))) =>
+          fields.foldLeft(0L) { (count, field) =>
+            if (hash.containsKey(field)) {
+              hash.remove(field)
+              count + 1
+            } else {
+              count
+            }
+          }
+        case None => 0
+        case _ => wrongType()
+      }
+    }
+  }
+
+  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS", "HDEL")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -113,6 +133,12 @@ object HashCommands extends TedisErrors {
       }
       HmgetCmd(key, ks)
     case CommandParams("HEXISTS", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: Nil) => HexistsCmd(key, field)
+    case CommandParams("HDEL", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: others) =>
+      val otherFields = others.map {
+        case BulkStringValue(Some(s)) => s
+        case _ => syntaxError()
+      }
+      HdelCmd(key, field +: otherFields)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }

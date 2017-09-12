@@ -87,5 +87,25 @@ class HashCommandsParserSpec extends TedisSuite with TedisErrors {
       ex.error must be (WRONG_NUMBER_OF_ARGS.error)
       ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HEXISTS"))
     }
+
+    "parse 'hdel key f1 f2'" in {
+      val params = CommandParams("HDEL", List("key", "f1", "f2"))
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HdelCmd]
+
+      val hdelCmd = cmd.asInstanceOf[HdelCmd]
+      hdelCmd.key must be ("key")
+      hdelCmd.fields must be (Seq("f1", "f2"))
+    }
+
+    "throw wrong number of arguments for 'hdel key'" in {
+      val params = CommandParams("HDEL", List("key"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HDEL"))
+    }
   }
 }

@@ -136,7 +136,7 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
       }
     }
 
-    "hexists(key, field" must {
+    "hexists(key, field)" must {
       "return true if the hash contains the field" in {
         client.hset("k1", "f1", "v1")
         val v = client.hexists("k1", "f1")
@@ -157,6 +157,39 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
       "throw error if key is not hash" in {
         client.set("key", "value")
         an [Exception] mustBe thrownBy (client.hexists("key", "field"))
+      }
+    }
+
+    "hdel(key, field, fields)" must {
+      "delete existing fields" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2"), ("f3", "v3")))
+
+        val v = client.hdel("key", "f1", "f3")
+        v.value must be (2)
+
+        val v1 = client.hget("key", "f1")
+        v1 mustBe empty
+
+        val v2 = client.hget("key", "f2")
+        v2.value must be ("v2")
+      }
+
+      "return 0 if key does not exist" in {
+        val v = client.hdel("key", "f1", "f2")
+        v.value must be (0)
+      }
+
+      "does not count non-existing fields" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2")))
+
+        val v = client.hdel("key", "f1", "f2", "f3", "f4")
+        v.value must be (2)
+      }
+
+      "throw error if key is not a hash" in {
+        client.set("key", "value")
+
+        an [Exception] mustBe thrownBy (client.hdel("key", "f1"))
       }
     }
   }
