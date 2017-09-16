@@ -192,5 +192,100 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
         an [Exception] mustBe thrownBy (client.hdel("key", "f1"))
       }
     }
+
+    "hlen(key)" must {
+      "return correct length for hash" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2"), ("f3", "v3")))
+        val v = client.hlen("key")
+        v.value must be (3)
+      }
+
+      "return 0 if key does not exist" in {
+        val v = client.hlen("key")
+        v.value must be (0)
+      }
+
+      "return 0 if hash is empty" in {
+        client.hset("key", "f", "v")
+        client.hdel("key", "f")
+        val v = client.hlen("key")
+        v.value must be (0)
+      }
+
+      "throw error if key is not a hash" in {
+        client.set("key", "value")
+        an [Exception] mustBe thrownBy (client.hlen("key"))
+      }
+    }
+
+    "hkeys(key)" must {
+      "return correct keys for hash" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2"), ("f3", "v3")))
+        val v = client.hkeys("key")
+        v.value must be (List("f1", "f2", "f3"))
+      }
+
+      "return empty list if key does not exist" in {
+        val v = client.hkeys("key")
+        v.value must have size 0
+      }
+
+      "return empty list if hash is empty" in {
+        client.hset("key", "f1", "v1")
+        client.hdel("key", "f1")
+        val v = client.hkeys("key")
+        v.value must have size 0
+      }
+    }
+
+    "hvals(key)" must {
+      "return correct values for hash" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2"), ("f3", "v3")))
+        val v = client.hvals("key")
+        v.value must be (List("v1", "v2", "v3"))
+      }
+
+      "return empty list if hash does not exist" in {
+        val v = client.hvals("key")
+        v.value must have size 0
+      }
+
+      "return empty list if hash is empty" in {
+        client.hset("key", "f1", "v1")
+        client.hdel("key", "f1")
+        val v = client.hvals("key")
+        v.value must have size 0
+      }
+
+      "throw error if key is not a hash" in {
+        client.set("key", "value")
+        an [Exception] mustBe thrownBy (client.hvals("key"))
+      }
+    }
+
+    "hgetall(key)" must {
+      "return correct key-value pairs" in {
+        client.hmset("key", Seq(("f1", "v1"), ("f2", "v2"), ("f3", "v3")))
+        val v = client.hgetall1("key")
+        v.value must be (Map("f1" -> "v1", "f2" -> "v2", "f3" -> "v3"))
+      }
+
+      "return None if hash does not exist" in {
+        val v = client.hgetall1("key")
+        v mustBe empty
+      }
+
+      "return None if hash is empty" in {
+        client.hset("key", "f1", "v1")
+        client.hdel("key", "f1")
+        val v = client.hgetall1("key")
+        v mustBe empty
+      }
+
+      "throw error if key is not a hash" in {
+        client.set("key", "value")
+        an [Exception] mustBe thrownBy (client.hgetall1("key"))
+      }
+    }
   }
 }

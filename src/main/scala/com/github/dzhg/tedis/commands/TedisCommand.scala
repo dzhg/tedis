@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.commands
 
-import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue, RESPValue}
+import com.github.dzhg.tedis.protocol.RESP.{ArrayValue, BulkStringValue, IntegerValue, RESPValue}
 import com.github.dzhg.tedis.TedisStorage
 
 /**
@@ -27,3 +27,9 @@ trait AsNonNilBulkStringResult {
   this: TedisCommand[String] =>
   override def resultToRESP(v: String): RESPValue = BulkStringValue(Some(v))
 }
+
+trait AsArrayResult {
+  this: TedisCommand[Seq[String]] =>
+  override def resultToRESP(v: Seq[String]): RESPValue = ArrayValue(Some(v.map(s => BulkStringValue(Some(s)))))
+}
+

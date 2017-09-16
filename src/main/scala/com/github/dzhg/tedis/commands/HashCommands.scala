@@ -4,7 +4,7 @@ import com.github.dzhg.tedis._
 import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisHash}
 
-import scala.util.Try
+import scala.collection.JavaConverters._
 
 /**
   * @author dzhg 8/11/17
@@ -108,7 +108,50 @@ object HashCommands extends TedisErrors {
     }
   }
 
-  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS", "HDEL")
+  case class HlenCmd(key: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(hash))) => hash.keySet().size().toLong
+        case None => 0L
+        case _ => wrongType()
+      }
+    }
+  }
+
+  case class HkeysCmd(key: String) extends TedisCommand[Seq[String]] with AsArrayResult {
+    override def exec(storage: TedisStorage): Seq[String] = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(hash))) => hash.keySet().asScala.toSeq
+        case None => Seq.empty
+        case _ => wrongType()
+      }
+    }
+  }
+
+  case class HvalsCmd(key: String) extends TedisCommand[Seq[String]] with AsArrayResult {
+    override def exec(storage: TedisStorage): Seq[String] = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(hash))) => hash.values().asScala.toSeq
+        case None => Seq.empty
+        case _ => wrongType()
+      }
+    }
+  }
+
+  case class HgetallCmd(key: String) extends TedisCommand[Seq[String]] with AsArrayResult {
+    override def exec(storage: TedisStorage): Seq[String] = {
+      storage.get(key) match {
+        case Some(TedisEntry(_, TedisHash(hash))) => hash.entrySet().asScala.toSeq flatMap { entry =>
+          Seq(entry.getKey, entry.getValue)
+        }
+        case None => Seq.empty
+        case _ => wrongType()
+      }
+    }
+  }
+
+  val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS", "HDEL", "HLEN",
+    "HKEYS", "HVALS", "HGETALL")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -139,6 +182,10 @@ object HashCommands extends TedisErrors {
         case _ => syntaxError()
       }
       HdelCmd(key, field +: otherFields)
+    case CommandParams("HLEN", BulkStringValue(Some(key)) :: Nil) => HlenCmd(key)
+    case CommandParams("HKEYS", BulkStringValue(Some(key)) :: Nil) => HkeysCmd(key)
+    case CommandParams("HVALS", BulkStringValue(Some(key)) :: Nil) => HvalsCmd(key)
+    case CommandParams("HGETALL", BulkStringValue(Some(key)) :: Nil) => HgetallCmd(key)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }
