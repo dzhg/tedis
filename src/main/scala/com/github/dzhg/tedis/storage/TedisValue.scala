@@ -1,6 +1,6 @@
 package com.github.dzhg.tedis.storage
 
-import java.util.{HashMap => JHashMap, Map => JMap}
+import java.util.{HashMap => JHashMap, Map => JMap, List => JList, ArrayList => JArrayList}
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -29,6 +29,14 @@ object TedisHash {
   def apply(kvs: (String, String)*): TedisHash = {
     TedisHash(new JHashMap[String, String](kvs.toMap.asJava))
   }
+}
+
+case class TedisList(data: JList[String]) extends TedisValue
+
+object TedisList {
+  def apply(): TedisList = TedisList(new JArrayList[String]())
+
+  def apply(vs: Seq[String]): TedisList = TedisList(new JArrayList[String](vs.asJava))
 }
 
 case object BadTedisValue extends TedisValue // this one is useful for testing
