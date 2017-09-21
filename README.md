@@ -52,7 +52,7 @@ Currently supported by Tedis: 38
 
 ### Hashes
 
-[HDEL](https://redis.io/commands/hdel), [HEXISTS](https://redis.io/commands/hexists), [HGET](https://redis.io/commands/hget), [HGETALL](https://redis.io/commands/hgetall), HINCRBY, HINCRBYFLOAT, [HKEYS](https://redis.io/commands/hkeys), HLEN, [HMGET](https://redis.io/commands/hmget), [HMSET](https://redis.io/commands/hmset), [HSET](https://redis.io/commands/hset), [HSETNX](https://redis.io/commands/hsetnx), HSTRLEN, [HVALS](https://redis.io/commands/hvals), HSCAN
+[HDEL](https://redis.io/commands/hdel), [HEXISTS](https://redis.io/commands/hexists), [HGET](https://redis.io/commands/hget), [HGETALL](https://redis.io/commands/hgetall), HINCRBY, HINCRBYFLOAT, [HKEYS](https://redis.io/commands/hkeys), [HLEN](https://redis.io/commands/hlen), [HMGET](https://redis.io/commands/hmget), [HMSET](https://redis.io/commands/hmset), [HSET](https://redis.io/commands/hset), [HSETNX](https://redis.io/commands/hsetnx), HSTRLEN, [HVALS](https://redis.io/commands/hvals), HSCAN
 
 ### Lists
 
