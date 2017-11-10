@@ -126,5 +126,43 @@ class HashCommandsParserSpec extends TedisSuite with TedisErrors {
       ex.error must be (WRONG_NUMBER_OF_ARGS.error)
       ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HKEYS"))
     }
+
+    "parse 'hincrby key field 1" in {
+      val params = CommandParams("HINCRBY", List("key", "field", "1"))
+
+      parser.isDefinedAt(params) must be (true)
+
+      val cmd = parser(params)
+      cmd mustBe a [HincrbyCmd]
+
+      val hincrbyCmd = cmd.asInstanceOf[HincrbyCmd]
+      hincrbyCmd.key must be ("key")
+      hincrbyCmd.field must be ("field")
+      hincrbyCmd.value must be (1L)
+    }
+
+    "throw wrong number of arguments for 'hincrby hash field'" in {
+      val params = CommandParams("HINCRBY", List("hash", "field"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HINCRBY"))
+    }
+
+    "throw wrong number of arguments for 'hincrby hash field 1 2'" in {
+      val params = CommandParams("HINCRBY", List("hash", "field", "1", "2"))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_OF_ARGS.error)
+      ex.msg must be (WRONG_NUMBER_OF_ARGS.msg.format("HINCRBY"))
+    }
+
+    "throw wrong number format for 'hincrby hash field abc'" in {
+      val params = CommandParams("HINCRBY", List("hash", "field", "abc" ))
+
+      val ex = the [TedisException] thrownBy parser(params)
+      ex.error must be (WRONG_NUMBER_FORMAT.error)
+      ex.msg must be (WRONG_NUMBER_FORMAT.msg)
+    }
   }
 }

@@ -287,5 +287,34 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
         an [Exception] mustBe thrownBy (client.hgetall1("key"))
       }
     }
+
+    "hincrby(key, field, value)" must {
+      "return correct value after increment" in {
+        client.hset("key", "field", 1)
+        client.hincrby("key", "field", 1)
+        val v = client.hget("key", "field")
+        v.value must be ("2")
+      }
+
+      "return correct value if key does not exist" in {
+        client.hincrby("key", "field", 5)
+        val v = client.hget("key", "field")
+        v.value must be ("5")
+      }
+
+      "return correct value if field does not exist" in {
+        client.hset("key", "f1", 1)
+        client.hincrby("key", "f2", 5)
+        val v = client.hget("key", "f2")
+        v.value must be ("5")
+      }
+
+      "return correct value if increment is negative number" in {
+        client.hset("key", "field", 6)
+        client.hincrby("key", "field", -5)
+        val v = client.hget("key", "field")
+        v.value must be ("1")
+      }
+    }
   }
 }

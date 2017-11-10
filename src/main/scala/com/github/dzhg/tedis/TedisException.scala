@@ -23,6 +23,7 @@ trait TedisErrors {
   val WRONG_NUMBER_OF_ARGS = TedisError("wrong number of arguments for '%s' command")
   val PROTOCOL_ERROR = TedisError("protocol error")
   val WRONG_NUMBER_FORMAT = TedisError("value is not an integer or out of range")
+  val HASH_VALUE_NOT_AN_INTEGER = TedisError("hash value is not an integer")
 
   def wrongNumberOfArguments[T](cmd: String): T = throw TedisException(WRONG_NUMBER_OF_ARGS.error, WRONG_NUMBER_OF_ARGS.msg.format(cmd))
   def wrongType[T](): T = throw TedisException(WRONG_TYPE)
@@ -31,4 +32,5 @@ trait TedisErrors {
   def multiNested[T](): T = throw TedisException(MULTI_NESTED)
   def protocolError[T](): T = throw TedisException(PROTOCOL_ERROR)
   def numberFormatError[T](): T = throw TedisException(WRONG_NUMBER_FORMAT)
+  def hashValueNotAnInteger[T](): T = throw TedisException(HASH_VALUE_NOT_AN_INTEGER)
 }

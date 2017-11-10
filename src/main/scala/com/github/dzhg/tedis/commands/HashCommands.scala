@@ -5,6 +5,7 @@ import com.github.dzhg.tedis.protocol.RESP.{BulkStringValue, IntegerValue}
 import com.github.dzhg.tedis.storage.{TedisEntry, TedisHash}
 
 import scala.collection.JavaConverters._
+import scala.util.{Success, Try}
 
 /**
   * @author dzhg 8/11/17
@@ -150,8 +151,30 @@ object HashCommands extends TedisErrors {
     }
   }
 
+  case class HincrbyCmd(key: String, field: String, value: Long) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case None =>
+          storage.put(key, entry(key, TedisHash((field, value.toString))))
+          value
+        case Some(TedisEntry(_, TedisHash(hash))) =>
+          Option(hash.get(field)) map { str =>
+            Try(str.toLong) map { v =>
+              val nv = v + value
+              hash.put(field, nv.toString)
+              nv
+            } getOrElse hashValueNotAnInteger()
+          } getOrElse {
+            hash.put(field, value.toString)
+            value
+          }
+        case _ => wrongType()
+      }
+    }
+  }
+
   val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS", "HDEL", "HLEN",
-    "HKEYS", "HVALS", "HGETALL")
+    "HKEYS", "HVALS", "HGETALL", "HINCRBY")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -186,6 +209,8 @@ object HashCommands extends TedisErrors {
     case CommandParams("HKEYS", BulkStringValue(Some(key)) :: Nil) => HkeysCmd(key)
     case CommandParams("HVALS", BulkStringValue(Some(key)) :: Nil) => HvalsCmd(key)
     case CommandParams("HGETALL", BulkStringValue(Some(key)) :: Nil) => HgetallCmd(key)
+    case CommandParams("HINCRBY", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
+      Try(value.toLong) map (HincrbyCmd(key, field, _)) getOrElse numberFormatError()
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }
