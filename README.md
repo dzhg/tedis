@@ -36,11 +36,11 @@ val v = client.get("key")
 
 ## Command supported
 
-![Command Support Progress](https://img.shields.io/badge/progress-39%2F200-orange.svg)
+![Command Support Progress](https://img.shields.io/badge/progress-40%2F200-orange.svg)
 
 Total number of commands available in Redis: [200](https://redis.io/commands)
 
-Currently supported by Tedis: 39
+Currently supported by Tedis: 40
 
 ### Keys
 
@@ -52,7 +52,7 @@ Currently supported by Tedis: 39
 
 ### Hashes
 
-[HDEL](https://redis.io/commands/hdel), [HEXISTS](https://redis.io/commands/hexists), [HGET](https://redis.io/commands/hget), [HGETALL](https://redis.io/commands/hgetall), [HINCRBY](https://redis.io/commands/hincrby), HINCRBYFLOAT, [HKEYS](https://redis.io/commands/hkeys), [HLEN](https://redis.io/commands/hlen), [HMGET](https://redis.io/commands/hmget), [HMSET](https://redis.io/commands/hmset), [HSET](https://redis.io/commands/hset), [HSETNX](https://redis.io/commands/hsetnx), HSTRLEN, [HVALS](https://redis.io/commands/hvals), HSCAN
+[HDEL](https://redis.io/commands/hdel), [HEXISTS](https://redis.io/commands/hexists), [HGET](https://redis.io/commands/hget), [HGETALL](https://redis.io/commands/hgetall), [HINCRBY](https://redis.io/commands/hincrby), [HINCRBYFLOAT](https://redis.io/commands/hincrbyfloat), [HKEYS](https://redis.io/commands/hkeys), [HLEN](https://redis.io/commands/hlen), [HMGET](https://redis.io/commands/hmget), [HMSET](https://redis.io/commands/hmset), [HSET](https://redis.io/commands/hset), [HSETNX](https://redis.io/commands/hsetnx), HSTRLEN, [HVALS](https://redis.io/commands/hvals), HSCAN
 
 ### Lists
 

@@ -316,5 +316,31 @@ class HashSpec extends TedisSuite with ServerAndClient with TedisErrors {
         v.value must be ("1")
       }
     }
+
+    "hincrbyfloat(key, field, value)" must {
+      "return correct value after increment" in {
+        client.hset("key", "field", "2.5")
+        val v = client.hincrbyfloat("key", "field", 1.2F)
+        v.value must be (3.7F)
+      }
+
+      "return correct value if key does not exist" in {
+        val v = client.hincrbyfloat("key", "f1", 2.0F)
+        v.value must be (2.0F)
+      }
+
+      "return correct value if field does not exist" in {
+        client.hset("key", "f1", "abc")
+        val v = client.hincrbyfloat("key", "f2", 1.5F)
+        v.value must be (1.5F)
+      }
+
+      "set the field with correct value" in {
+        client.hset("key", "f1", "5.5")
+        client.hincrbyfloat("key", "f1", 1.2F)
+        val v = client.hget("key", "f1")
+        v.value.toFloat must be (6.7F)
+      }
+    }
   }
 }

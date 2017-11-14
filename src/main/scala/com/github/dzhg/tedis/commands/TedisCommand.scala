@@ -33,3 +33,8 @@ trait AsArrayResult {
   override def resultToRESP(v: Seq[String]): RESPValue = ArrayValue(Some(v.map(s => BulkStringValue(Some(s)))))
 }
 
+trait AsFloatResult {
+  this: TedisCommand[Float] =>
+  override def resultToRESP(v: Float): RESPValue = BulkStringValue(Some(v.toString))
+}
+
