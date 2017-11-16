@@ -195,8 +195,21 @@ object HashCommands extends TedisErrors {
     }
   }
 
+  case class HstrlenCmd(key: String, field: String) extends TedisCommand[Long] with AsIntegerResult {
+    override def exec(storage: TedisStorage): Long = {
+      storage.get(key) match {
+        case None => 0
+        case Some(TedisEntry(_, TedisHash(hash))) =>
+          Option(hash.get(field)) map { str =>
+            str.length.toLong
+          } getOrElse 0
+        case _ => wrongType()
+      }
+    }
+  }
+
   val COMMANDS: Set[String] = Set("HSET", "HGET", "HSETNX", "HMSET", "HMGET", "HEXISTS", "HDEL", "HLEN",
-    "HKEYS", "HVALS", "HGETALL", "HINCRBY", "HINCRBYFLOAT")
+    "HKEYS", "HVALS", "HGETALL", "HINCRBY", "HINCRBYFLOAT", "HSTRLEN")
 
   var Parsers: CommandParser = {
     case CommandParams("HSET", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
@@ -235,6 +248,7 @@ object HashCommands extends TedisErrors {
       Try(value.toLong) map (HincrbyCmd(key, field, _)) getOrElse numberFormatError()
     case CommandParams("HINCRBYFLOAT", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: BulkStringValue(Some(value)) :: Nil) =>
       Try(value.toFloat) map (HincrybyfloatCmd(key, field, _)) getOrElse floatNumberFormatError()
+    case CommandParams("HSTRLEN", BulkStringValue(Some(key)) :: BulkStringValue(Some(field)) :: Nil) => HstrlenCmd(key, field)
     case CommandParams(cmd, _) if COMMANDS.contains(cmd) => wrongNumberOfArguments(cmd)
   }
 }
